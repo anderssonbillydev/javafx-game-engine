@@ -1,4 +1,4 @@
-package game_engine.render.shapes;
+package game_engine.render;
 
 import game_engine.model.Point2D;
 import javafx.scene.paint.Color;

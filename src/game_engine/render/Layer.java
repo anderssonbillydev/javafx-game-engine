@@ -4,69 +4,89 @@ import game_engine.model.Point2D;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
 
 public class Layer {
 
-    private ImageView screen;
-    private WritableImage image;
-    private Point2D size, offset;
-    private BlendMode blendMode;
+	private ImageView screen;
+	private WritableImage image;
+	private int width, height;
+	private Point2D offset;
+	private Color background;
 
-    public Layer(Point2D size){
-        this(size, new Point2D(0,0), BlendMode.ADD);
-    }
+	public Layer(int width, int height) {
+		this(width, height, new Point2D(0, 0), null);
+	}
 
-    public Layer(Point2D size, Point2D offset){
-        this(size, offset, BlendMode.ADD);
-    }
+	public Layer(int width, int height, Point2D offset) {
+		this(width, height, offset, null);
+	}
 
-    public Layer(Point2D size, Point2D offset, BlendMode blendMode){
-        this.size = size;
-        this.blendMode = blendMode;
-        this.image = new WritableImage(this.size.getX(),this.size.getY());
-        this.screen = new ImageView(image);
-        setOffset(offset);
-    }
+	public Layer(int width, int height, Point2D offset, BlendMode blendMode) {
+		setWidth(width);
+		setHeight(height);
+		setImage(new WritableImage(this.width, this.height));
+		setScreen(new ImageView(image));
+		setOffset(offset);
+		setBlendMode(blendMode);
+		setBackground(Color.WHITE);
+	}
 
-    public ImageView getScreen() {
-        return screen;
-    }
+	public ImageView getScreen() {
+		return screen;
+	}
 
-    public void setScreen(ImageView screen) {
-        this.screen = screen;
-    }
+	public void setScreen(ImageView screen) {
+		this.screen = screen;
+	}
 
-    public WritableImage getImage() {
-        return image;
-    }
+	public WritableImage getImage() {
+		return image;
+	}
 
-    public void setImage(WritableImage image) {
-        this.image = image;
-    }
+	public void setImage(WritableImage image) {
+		this.image = image;
+	}
 
-    public Point2D getSize() {
-        return size;
-    }
+	public int getWidth() {
+		return width;
+	}
 
-    public void setSize(Point2D size) {
-        this.size = size;
-    }
+	public void setWidth(int width) {
+		this.width = width;
+	}
 
-    public Point2D getOffset() {
-        return offset;
-    }
+	public int getHeight() {
+		return height;
+	}
 
-    public void setOffset(Point2D offset) {
-        this.offset = offset;
-        this.screen.setX(this.offset.getX());
-        this.screen.setY(this.offset.getY());
-    }
+	public void setHeight(int height) {
+		this.height = height;
+	}
 
-    public BlendMode getBlendMode() {
-        return blendMode;
-    }
+	public Point2D getOffset() {
+		return offset;
+	}
 
-    public void setBlendMode(BlendMode blendMode) {
-        screen.setBlendMode(blendMode);
-    }
+	public void setOffset(Point2D offset) {
+		this.offset = offset;
+		this.screen.setX(this.offset.getX());
+		this.screen.setY(this.offset.getY());
+	}
+
+	public BlendMode getBlendMode() {
+		return screen.getBlendMode();
+	}
+
+	public void setBlendMode(BlendMode blendMode) {
+		screen.setBlendMode(blendMode);
+	}
+
+	public Color getBackground(){
+		return this.background;
+	}
+
+	public void setBackground(Color color){
+		background = color;
+	}
 }
