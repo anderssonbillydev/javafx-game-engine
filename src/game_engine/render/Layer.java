@@ -4,7 +4,6 @@ import game_engine.model.Point2D;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
 
 public class Layer {
 
@@ -12,10 +11,14 @@ public class Layer {
 	private WritableImage image;
 	private int width, height;
 	private Point2D offset;
-	private Color background;
+	private byte[] blank;
 
 	public Layer(int width, int height) {
 		this(width, height, new Point2D(0, 0), null);
+	}
+
+	public Layer(int width, int height, BlendMode blendMode) {
+		this(width, height, new Point2D(0, 0), blendMode);
 	}
 
 	public Layer(int width, int height, Point2D offset) {
@@ -29,7 +32,7 @@ public class Layer {
 		setScreen(new ImageView(image));
 		setOffset(offset);
 		setBlendMode(blendMode);
-		setBackground(Color.WHITE);
+		blank = new byte[width*height*4];
 	}
 
 	public ImageView getScreen() {
@@ -82,11 +85,7 @@ public class Layer {
 		screen.setBlendMode(blendMode);
 	}
 
-	public Color getBackground(){
-		return this.background;
-	}
-
-	public void setBackground(Color color){
-		background = color;
+	public byte[] getBlank() {
+		return blank;
 	}
 }

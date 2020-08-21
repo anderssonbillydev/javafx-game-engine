@@ -1,47 +1,66 @@
 package game_engine.render;
 
-import game_engine.model.Point2D;
-import javafx.scene.paint.Color;
-
 public class Pixel {
 
-    private Point2D position;
-    private Color color;
+	private byte[] rgb;
 
-    public Pixel(Point2D position, Color color) {
-        this.position = position;
-        this.color = color;
-    }
+	public Pixel(byte[] bgra) {
+		rgb = bgra;
+	}
 
-    public Color getColor() {
-        return color;
-    }
+	public Pixel(int r, int g, int b) {
+		this(r, g, b, 255);
+	}
 
-    public void setColor(Color color) {
-        this.color = color;
-    }
+	public Pixel(int r, int g, int b, int a) {
+		rgb = new byte[4];
+		rgb[0] = setValueValidRange(b);
+		rgb[1] = setValueValidRange(g);
+		rgb[2] = setValueValidRange(r);
+		rgb[3] = setValueValidRange(a);
+	}
 
-    public void setX(int x) {
-        position.setX(x);
-    }
+	public byte[] getRGB() {
+		return rgb;
+	}
 
-    public int getX() {
-        return position.getX();
-    }
+	public int getBlue() {
+		return rgb[0] & 0xFF;
+	}
 
-    public void setY(int y) {
-        position.setY(y);
-    }
+	public int getGreen() {
+		return rgb[1] & 0xFF;
+	}
 
-    public int getY() {
-        return position.getY();
-    }
+	public int getRed() {
+		return rgb[2] & 0xFF;
+	}
 
-    public Point2D getPosition() {
-        return position;
-    }
+	public int getAlpha() {
+		return rgb[3] & 0xFF;
+	}
 
-    public void setPosition(Point2D position) {
-        this.position = position;
-    }
+	public void setRed(int r) {
+		rgb[2] = setValueValidRange(r);
+	}
+
+	public void setGreen(int g) {
+		rgb[1] = setValueValidRange(g);
+	}
+
+	public void setBlue(int b) {
+		rgb[0] = setValueValidRange(b);
+	}
+
+	public void setAlpha(int a) {
+		rgb[3] = setValueValidRange(a);
+	}
+
+	private byte setValueValidRange(int value) {
+		if (value > 255)
+			value = 255;
+		if (value < 0)
+			value = 0;
+		return (byte) value;
+	}
 }

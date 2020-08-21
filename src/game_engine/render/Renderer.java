@@ -3,191 +3,228 @@ package game_engine.render;
 import game_engine.model.Point2D;
 import game_engine.window.Window;
 import javafx.scene.Group;
+import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelWriter;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Renderer {
 
-	private Window window;
-	private LinkedHashMap<String, Layer> layers;
-	private Group screen;
-	private String activeLayer;
+    private Window window;
+    private LinkedHashMap<String, Layer> layers;
+    private Group screen;
+    private String activeLayer;
 
-	public Renderer(Window window) {
-		this.window = window;
-		layers = new LinkedHashMap<>();
-		Layer bottomLayer = new Layer(this.window.getWidth(), this.window.getHeight());
-		layers.put("root", bottomLayer);
-		screen = new Group(bottomLayer.getScreen());
-		activeLayer = "root";
-	}
+    public Renderer(Window window) {
+        this.window = window;
+        layers = new LinkedHashMap<>();
+        Layer bottomLayer = new Layer(this.window.getScreenWidth(), this.window.getScreenHeight());
+        layers.put("root", bottomLayer);
+        screen = new Group(bottomLayer.getScreen());
+        activeLayer = "root";
+    }
 
-	// DRAW METHODS
+    // DRAW METHODS
+    public void drawPixel(Point2D pos, Pixel pixel) {
+        drawPixel(pos.getX(), pos.getY(), pixel);
+    }
 
-	public void drawPixel(Pixel pixel) {
-		drawPixel(pixel, activeLayer);
-	}
+    public void drawPixel(int x, int y, Pixel pixel) {
+        Layer layer = getActivelayer();
+        double width = layer.getWidth();
+        double height = layer.getHeight();
+        int size = window.getPixelSize();
+        if ((x * size) >= 0 && (x * size) < width &&
+                (y * size) >= 0 && (y * size) < height) {
+            int pixels = size * size * 4;
+            byte[] buffer = new byte[pixels];
+            byte[] pixelColor = pixel.getRGB();
 
-	public void drawPixel(Pixel pixel, String layerName) {
-		Layer layer = layers.get(layerName);
-		if (layer != null) {
-			PixelWriter pw = layer.getImage().getPixelWriter();
-			int size = window.getPixelSize();
-			for (int i = 0; i < size; i++) {
-				for (int j = 0; j < size; j++) {
-					if ((pixel.getX() * size + j) >= 0 &&
-							(pixel.getX() * size + j) < layer.getImage().getWidth() &&
-							(pixel.getY() * size + i) >= 0 &&
-							(pixel.getY() * size + i) < layer.getImage().getHeight()) {
-						pw.setColor(pixel.getX() * size + j, pixel.getY() * size + i, pixel.getColor());
-					}
-				}
-			}
-		}
-	}
+            System.arraycopy(pixelColor, 0, buffer, 0, pixelColor.length);
+            int usedSize = pixelColor.length;
+            while (usedSize < buffer.length) {
+                System.arraycopy(buffer, 0, buffer, usedSize, Math.min(buffer.length - usedSize, usedSize));
+                usedSize *= 2;
+            }
 
-	public void drawSquare(Pixel pixel, int size) {
-		drawSquare(pixel, size, activeLayer);
-	}
+            PixelWriter pw = layer.getImage().getPixelWriter();
+            pw.setPixels(x * size, y * size, size, size, PixelFormat.getByteBgraPreInstance(), buffer, 0, size * 4);
+        }
+    }
 
-	public void drawSquare(Pixel pixel, int size, String layerName) {
-		drawRectangle(pixel, size, size, layerName);
-	}
+    public void drawPixels(Point2D pos, int width, int height, Pixel[] pixels) {
+        drawPixels(pos.getX(), pos.getY(), width, height, pixels);
+    }
 
-	public void drawRectangle(Pixel pixel, int width, int height) {
-		drawRectangle(pixel, width, height, activeLayer);
-	}
+    public void drawPixels(int x, int y, int width, int height, Pixel[] pixels) {
+        int size = window.getPixelSize();
 
-	public void drawRectangle(Pixel pixel, int width, int height, String layerName) {
-		Layer layer = getLayer(layerName);
-		if (layer != null) {
-			for (int i = 0; i < height; i++) {
-				for (int j = 0; j < width; j++) {
-					Pixel p = new Pixel(
-							new Point2D(pixel.getX() + j, pixel.getY() + i),
-							pixel.getColor()
-					);
-					drawPixel(p, layerName);
-				}
-			}
-		}
-	}
+        int bufferWidth = (size * width)*4;
+        int bufferHeight = (size * height);
+        byte[] buffer = new byte[bufferWidth * bufferHeight];
 
-	public void drawLine(Pixel pixel, int x1, int y1) {
-		drawLine(pixel, x1, y1, false, activeLayer);
-	}
+        for(int iy=0;iy<bufferHeight;iy++){
+            for(int ix=0;ix<bufferWidth;ix+=4){
+                byte[] pixelColor = pixels[(ix/size)/4 + (iy/size) *width].getRGB();
+                buffer[ix + iy * bufferWidth] = pixelColor[0];
+                buffer[ix+1 + iy * bufferWidth] = pixelColor[1];
+                buffer[ix+2 + iy * bufferWidth] = pixelColor[2];
+                buffer[ix+3 + iy * bufferWidth] = pixelColor[3];
+            }
+        }
 
-	public void drawLine(Pixel pixel, int x1, int y1, boolean thick) {
-		drawLine(pixel, x1, y1, thick, activeLayer);
-	}
+        drawPixels(x, y, width, height, buffer);
+    }
 
-	public void drawLine(Pixel pixel, int x1, int y1, boolean thick, String layerName) {
-		int dx = Math.abs(x1 - pixel.getX());
-		int sx = pixel.getX() < x1 ? 1 : -1;
-		int dy = -Math.abs(y1 - pixel.getY());
-		int sy = pixel.getY() < y1 ? 1 : -1;
-		int err = dx + dy;
+    public void drawPixels(int x, int y, int width, int height, byte[] buffer) {
+        Layer layer = getActivelayer();
+        int size = window.getPixelSize();
 
-		if (pixel.getY() == y1) {
-			// Horizontal line
-			int X0 = Math.min(pixel.getX(), x1);
-			int X1 = Math.max(pixel.getX(), x1);
-			for(int x=X0;x<=X1;x++){
-				pixel.setX(x);
-				drawPixel(pixel,layerName);
-			}
-		} else if (pixel.getX() == x1) {
-			// Vertical line
-			int Y0 = Math.min(pixel.getY(), y1);
-			int Y1 = Math.max(pixel.getY(), y1);
-			for(int y=Y0;y<=Y1;y++){
-				pixel.setY(y);
-				drawPixel(pixel,layerName);
-			}
-		} else {
-			// Diagonal line
-			drawPixel(pixel, layerName);
-			while (true) {
-				if (pixel.getX() == x1 && pixel.getY() == y1) break;
-				int e2 = 2 * err;
-				if (thick) {
-					// draw points between diagonals
-					if (e2 - dy > dx - e2) {
-						err += dy;
-						pixel.setX((pixel.getX() + sx));
-					} else {
-						err += dx;
-						pixel.setY(pixel.getY() + sy);
-					}
-				} else {
-					// Skip points between diagonals
-					if (e2 >= dy) {
-						err += dy;
-						pixel.setX((pixel.getX() + sx));
-					}
-					if (e2 <= dx) {
-						err += dx;
-						pixel.setY(pixel.getY() + sy);
-					}
-				}
-				drawPixel(pixel, layerName);
-			}
-		}
-	}
+        // TODO FUTURE: Make this method do the resize of the buffer
+        // TODO FUTURE: This is to make it possible to draw byte[] directly
 
-	public void clear() {
-		clear(activeLayer);
-	}
+        PixelWriter pw = layer.getImage().getPixelWriter();
+        pw.setPixels(x * size, y * size, width*size, height*size, PixelFormat.getByteBgraPreInstance(), buffer, 0, width*size*4);
+    }
 
-	public void clear(String layerName) {
-		Layer layer = getLayer(layerName);
-		drawRectangle(new Pixel(new Point2D(0, 0), layer.getBackground()), layer.getWidth(), layer.getHeight(), layerName);
-	}
+    public void drawSquare(Point2D pos, int size, Pixel pixel) {
+        drawSquare(pos.getX(), pos.getY(), size, pixel);
+    }
 
-	// LAYER LOGIC
+    public void drawSquare(int x, int y, int size, Pixel pixel) {
+        drawRectangle(x, y, size, size, pixel);
+    }
 
-	public void addLayer(String name, Layer layer) {
-		layers.put(name, layer);
-		screen.getChildren().add(layer.getScreen());
-	}
+    public void drawRectangle(Point2D pos, int width, int height, Pixel pixel) {
+        drawRectangle(pos.getX(), pos.getY(), width, height, pixel);
+    }
 
-	public void removeLayer(String layerName) {
-		if (!layerName.equals("root") && layers.containsKey(layerName)) {
-			screen.getChildren().remove(layers.get(layerName).getScreen());
-			layers.remove(layerName);
-		}
-	}
+    public void drawRectangle(int x, int y, int width, int height, Pixel pixel) {
+        for (int iy = 0; iy < height; iy++) {
+            for (int ix = 0; ix < width; ix++) {
+                drawPixel(x + ix, y + iy, pixel);
+            }
+        }
+    }
 
-	public void setActiveLayer(String layerName) {
-		activeLayer = (layers.containsKey(layerName)) ? layerName : "root";
-	}
+    public void drawLine(Point2D pos1, Point2D pos2, Pixel pixel) {
+        drawLine(pos1.getX(), pos1.getY(), pos2.getX(), pos2.getY(), false, pixel);
+    }
 
-	public String getActivelayerName() {
-		return activeLayer;
-	}
+    public void drawLine(Point2D pos1, Point2D pos2, boolean thick, Pixel pixel) {
+        drawLine(pos1.getX(), pos1.getY(), pos2.getX(), pos2.getY(), thick, pixel);
+    }
 
-	public Layer getActivelayer() {
-		return getLayer(getActivelayerName());
-	}
+    public void drawLine(int x1, int y1, int x2, int y2, Pixel pixel) {
+        drawLine(x1, y1, x2, y2, false, pixel);
+    }
 
-	public Layer getLayer(String layerName) {
-		return layers.get(layerName);
-	}
+    public void drawLine(int x1, int y1, int x2, int y2, boolean thick, Pixel pixel) {
+        int dx = Math.abs(x2 - x1);
+        int sx = x1 < x2 ? 1 : -1;
+        int dy = -Math.abs(y2 - y1);
+        int sy = y1 < y2 ? 1 : -1;
+        int err = dx + dy;
 
-	// GETTERS AND SETTERS
-	public Group getScreen() {
-		return screen;
-	}
+        if (y1 == y2) {
+            // Horizontal line
+            int X0 = Math.min(x1, x2);
+            int X1 = Math.max(x1, x2);
+            for (int x = X0; x <= X1; x++) {
+                drawPixel(x, y1, pixel);
+            }
+        } else if (x1 == x2) {
+            // Vertical line
+            int Y0 = Math.min(y1, y2);
+            int Y1 = Math.max(y1, y2);
+            for (int y = Y0; y <= Y1; y++) {
+                drawPixel(x1, y, pixel);
+            }
+        } else {
+            // Diagonal line
+            drawPixel(x1, y1, pixel);
+            while (true) {
+                if (x1 == x2 && y1 == y2) break;
+                int e2 = 2 * err;
+                if (thick) {
+                    // draw points between diagonals
+                    if (e2 - dy > dx - e2) {
+                        err += dy;
+                        x1 += sx;
+                    } else {
+                        err += dx;
+                        y1 += sy;
+                    }
+                } else {
+                    // Skip points between diagonals
+                    if (e2 >= dy) {
+                        err += dy;
+                        x1 += sx;
+                    }
+                    if (e2 <= dx) {
+                        err += dx;
+                        y1 += sy;
+                    }
+                }
+                drawPixel(x1, y1, pixel);
+            }
+        }
+    }
 
-	public Layer getBottomLayer() {
-		return layers.entrySet().iterator().next().getValue();
-	}
+    public void drawSprite() {
 
-	public Layer getTopLayer() {
-		Layer lastLayer = getBottomLayer();
-		for (Map.Entry<String, Layer> stringLayerEntry : layers.entrySet()) lastLayer = stringLayerEntry.getValue();
-		return lastLayer;
-	}
+    }
+
+    public void clear() {
+        // TODO fix clear so whole layer is emptied
+        Layer layer = getLayer(activeLayer);
+        layer.getBlank();
+        PixelWriter pw = layer.getImage().getPixelWriter();
+        pw.setPixels(0, 0, layer.getWidth(), layer.getHeight(), PixelFormat.getByteBgraPreInstance(), layer.getBlank(), 0, layer.getWidth() * 4);
+    }
+
+    // LAYER LOGIC
+
+    public void addLayer(String name, Layer layer) {
+        layers.put(name, layer);
+        screen.getChildren().add(layer.getScreen());
+    }
+
+    public void removeLayer(String layerName) {
+        if (!layerName.equals("root") && layers.containsKey(layerName)) {
+            screen.getChildren().remove(layers.get(layerName).getScreen());
+            layers.remove(layerName);
+        }
+    }
+
+    public void setActiveLayer(String layerName) {
+        activeLayer = (layers.containsKey(layerName)) ? layerName : "root";
+    }
+
+    public String getActivelayerName() {
+        return activeLayer;
+    }
+
+    public Layer getActivelayer() {
+        return getLayer(getActivelayerName());
+    }
+
+    public Layer getLayer(String layerName) {
+        return layers.get(layerName);
+    }
+
+    // GETTERS AND SETTERS
+    public Group getScreen() {
+        return screen;
+    }
+
+    public Layer getBottomLayer() {
+        return layers.entrySet().iterator().next().getValue();
+    }
+
+    public Layer getTopLayer() {
+        Layer lastLayer = getBottomLayer();
+        for (Map.Entry<String, Layer> stringLayerEntry : layers.entrySet()) lastLayer = stringLayerEntry.getValue();
+        return lastLayer;
+    }
 }

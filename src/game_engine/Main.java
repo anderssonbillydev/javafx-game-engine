@@ -5,21 +5,35 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-    private final String TITLE = "JavaFX GameEngine";
+	private final String TITLE = "JavaFX GameEngine";
 
-    @Override
-    public void start(Stage primaryStage) throws Exception{
-        GameEngine engine = new GameEngine(400,300,2);
+	@Override
+	public void start(Stage stage) throws Exception {
+		GameEngine engine = new GameEngine(200, 150, 5) {
+			@Override
+			public void onCreate() {
 
-        primaryStage.setTitle(TITLE);
-        primaryStage.setScene(engine.createScene());
-        primaryStage.show();
+			}
 
-        engine.test();
-    }
+			@Override
+			public void onUpdate() {
 
+			}
+		};
 
-    public static void main(String[] args) {
-        launch(args);
-    }
+		stage.setResizable(false);
+		stage.setTitle(TITLE);
+		stage.setScene(engine.createScene());
+		stage.sizeToScene();
+		stage.show();
+
+		engine.debug("tracker");
+		engine.debug("static");
+//		engine.debug("checker");
+//		engine.debug("line");
+	}
+
+	public static void main(String[] args) {
+		launch(args);
+	}
 }
