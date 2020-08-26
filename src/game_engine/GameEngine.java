@@ -175,7 +175,7 @@ public abstract class GameEngine {
                                     mouseX / window.getPixelSize(),
                                     mouseY / window.getPixelSize(),
                                     thick,
-                                    new Pixel(0, 0, 255));
+                                    new Pixel(Color.BLUE));
                             oldMouseX = mouseX;
                             oldMouseY = mouseY;
                         }

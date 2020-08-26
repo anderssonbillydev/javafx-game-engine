@@ -12,7 +12,6 @@ public class Sprite {
     private Pixel[] pixels;
 
     public Sprite(String path, int width, int height) {
-        // TODO load image from hardrive and convert to pixels array
         // TODO FUTURE: make a byte[] buffer of image that can be directly drawn with renderer
         setWidth(width);
         setHeight(height);
