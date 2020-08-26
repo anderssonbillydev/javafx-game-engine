@@ -1,5 +1,6 @@
 package game_engine.render;
 
+import game_engine.javafx.scene.image.PixelatedScalingImageView;
 import game_engine.model.Point2D;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.image.ImageView;
@@ -9,30 +10,35 @@ public class Layer {
 
 	private ImageView screen;
 	private WritableImage image;
-	private int width, height;
+	private int width, height, pixelSize;
 	private Point2D offset;
 	private byte[] blank;
 
-	public Layer(int width, int height) {
-		this(width, height, new Point2D(0, 0), null);
+	public Layer(int width, int height, int pixelSize) {
+		this(width, height,pixelSize, new Point2D(0, 0), null);
 	}
 
-	public Layer(int width, int height, BlendMode blendMode) {
-		this(width, height, new Point2D(0, 0), blendMode);
+	public Layer(int width, int height, int pixelSize, BlendMode blendMode) {
+		this(width, height,pixelSize, new Point2D(0, 0), blendMode);
 	}
 
-	public Layer(int width, int height, Point2D offset) {
-		this(width, height, offset, null);
+	public Layer(int width, int height, int pixelSize, Point2D offset) {
+		this(width, height,pixelSize, offset, null);
 	}
 
-	public Layer(int width, int height, Point2D offset, BlendMode blendMode) {
+	public Layer(int width, int height, int pixelSize, Point2D offset, BlendMode blendMode) {
 		setWidth(width);
 		setHeight(height);
+		setPixelSize(pixelSize);
 		setImage(new WritableImage(this.width, this.height));
-		setScreen(new ImageView(image));
+		setScreen(new PixelatedScalingImageView(image));
 		setOffset(offset);
 		setBlendMode(blendMode);
 		blank = new byte[width*height*4];
+
+		this.screen.setSmooth(false);
+		this.screen.setFitWidth(this.width * this.pixelSize);
+		this.screen.setFitHeight(this.height * this.pixelSize);
 	}
 
 	public ImageView getScreen() {
@@ -65,6 +71,14 @@ public class Layer {
 
 	public void setHeight(int height) {
 		this.height = height;
+	}
+
+	public int getPixelSize() {
+		return pixelSize;
+	}
+
+	public void setPixelSize(int pixelSize) {
+		this.pixelSize = pixelSize;
 	}
 
 	public Point2D getOffset() {

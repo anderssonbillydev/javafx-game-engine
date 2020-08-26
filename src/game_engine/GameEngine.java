@@ -2,49 +2,62 @@ package game_engine;
 
 import com.sun.javafx.perf.PerformanceTracker;
 import game_engine.handler.InputHandler;
-import game_engine.render.Color;
-import game_engine.render.Layer;
-import game_engine.render.Pixel;
-import game_engine.render.Renderer;
+import game_engine.render.*;
 import game_engine.window.Window;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 
 import java.util.Random;
 
 public abstract class GameEngine {
 
+    private String title;
+    private Stage stage;
     private Window window;
     private Pane screne;
     private Scene scene;
     private Renderer renderer;
     private InputHandler inputHandler;
 
-    public GameEngine(int width, int height) {
-        this(width, height, 1);
+    public GameEngine(String title, Stage stage, int width, int height) {
+        this(title, stage, width, height, 1);
     }
 
-    public GameEngine(int width, int height, int pixelSize) {
+    public GameEngine(String title, Stage stage, int width, int height, int pixelSize) {
+        this.title = title;
+        this.stage = stage;
         this.window = new Window(width, height, pixelSize);
         this.renderer = new Renderer(this.window);
         this.inputHandler = new InputHandler();
+        setupStage();
+    }
+
+    private void setupStage(){
+        stage.setResizable(false);
+        stage.setTitle(this.title);
+        stage.setScene(createScene());
+        stage.sizeToScene();
+        stage.show();
     }
 
     public Scene createScene() {
         screne = new Pane();
         screne.getChildren().add(renderer.getScreen());
-        screne.setOnKeyPressed(key -> inputHandler.addKey(key.getCode()));
-        screne.setOnKeyReleased(key -> inputHandler.removeKey(key.getCode()));
-        screne.setOnMouseMoved(mouse -> {
+
+        scene = new Scene(screne, window.getScreenWidth(), window.getScreenHeight());
+        scene.setOnKeyPressed(key -> inputHandler.addKey(key.getCode()));
+        scene.setOnKeyReleased(key -> inputHandler.removeKey(key.getCode()));
+        scene.setOnMouseMoved(mouse -> {
             inputHandler.setMouseX((int) mouse.getX());
             inputHandler.setMouseY((int) mouse.getY());
         });
-        screne.setOnMousePressed(mouse -> inputHandler.addMouseButton(mouse.getButton()));
-        screne.setOnMouseReleased(mouse -> inputHandler.removeMouseButton(mouse.getButton()));
-        scene = new Scene(screne, window.getScreenWidth(), window.getScreenHeight());
+        scene.setOnMousePressed(mouse -> inputHandler.addMouseButton(mouse.getButton()));
+        scene.setOnMouseReleased(mouse -> inputHandler.removeMouseButton(mouse.getButton()));
         return scene;
     }
 
@@ -86,9 +99,9 @@ public abstract class GameEngine {
                 testLoop.start();
                 break;
             case "checker":
-                Layer checkerLayer = new Layer(window.getScreenWidth(), window.getScreenHeight());
-                renderer.addLayer("checker", checkerLayer);
+                renderer.createLayer("checker");
                 testLoop = new AnimationTimer() {
+
                     @Override
                     public void handle(long now) {
                         renderer.setActiveLayer("checker");
@@ -114,8 +127,7 @@ public abstract class GameEngine {
                 break;
             case "static":
                 Random r = new Random();
-                Layer staticLayer = new Layer(window.getScreenWidth(), window.getScreenHeight());
-                renderer.addLayer("static", staticLayer);
+                renderer.createLayer("static");
                 testLoop = new AnimationTimer() {
                     @Override
                     public void handle(long now) {
@@ -132,8 +144,7 @@ public abstract class GameEngine {
                 testLoop.start();
                 break;
             case "line":
-                Layer lineLayer = new Layer(window.getScreenWidth(), window.getScreenHeight());
-                renderer.addLayer("line", lineLayer);
+                renderer.createLayer("line");
                 testLoop = new AnimationTimer() {
                     int x = window.getWidth() / 2;
                     int y = window.getHeight() / 2;
@@ -167,6 +178,45 @@ public abstract class GameEngine {
                                     new Pixel(0, 0, 255));
                             oldMouseX = mouseX;
                             oldMouseY = mouseY;
+                        }
+                    }
+                };
+                testLoop.start();
+                break;
+            case "sprite":
+                renderer.createLayer("sprite");
+
+                Sprite sprite = new Sprite("C:\\Users\\billy.andersson\\Pictures\\stop.png",256,256);
+                testLoop = new AnimationTimer() {
+                    int x = 0;
+                    int y = 0;
+
+                    int oldX = -1;
+                    int oldY = -1;
+
+
+                    @Override
+                    public void handle(long now) {
+                        renderer.setActiveLayer("sprite");
+
+                        if(inputHandler.isKeyPressed(KeyCode.LEFT)){
+                            x--;
+                        }
+                        if(inputHandler.isKeyPressed(KeyCode.RIGHT)){
+                            x++;
+                        }
+                        if(inputHandler.isKeyPressed(KeyCode.UP)){
+                            y--;
+                        }
+                        if(inputHandler.isKeyPressed(KeyCode.DOWN)){
+                            y++;
+                        }
+
+                        if(oldX != x ||oldY != y) {
+                            oldX = x;
+                            oldY = y;
+                            renderer.clear();
+                            renderer.drawSprite(x, y, sprite);
                         }
                     }
                 };

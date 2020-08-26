@@ -18,7 +18,7 @@ public class Renderer {
     public Renderer(Window window) {
         this.window = window;
         layers = new LinkedHashMap<>();
-        Layer bottomLayer = new Layer(this.window.getScreenWidth(), this.window.getScreenHeight());
+        Layer bottomLayer = new Layer(this.window.getWidth(), this.window.getHeight(), this.window.getPixelSize());
         layers.put("root", bottomLayer);
         screen = new Group(bottomLayer.getScreen());
         activeLayer = "root";
@@ -33,22 +33,11 @@ public class Renderer {
         Layer layer = getActivelayer();
         double width = layer.getWidth();
         double height = layer.getHeight();
-        int size = window.getPixelSize();
-        if ((x * size) >= 0 && (x * size) < width &&
-                (y * size) >= 0 && (y * size) < height) {
-            int pixels = size * size * 4;
-            byte[] buffer = new byte[pixels];
+        if (x >= 0 && x < width &&
+                y >= 0 && y < height) {
             byte[] pixelColor = pixel.getRGB();
-
-            System.arraycopy(pixelColor, 0, buffer, 0, pixelColor.length);
-            int usedSize = pixelColor.length;
-            while (usedSize < buffer.length) {
-                System.arraycopy(buffer, 0, buffer, usedSize, Math.min(buffer.length - usedSize, usedSize));
-                usedSize *= 2;
-            }
-
             PixelWriter pw = layer.getImage().getPixelWriter();
-            pw.setPixels(x * size, y * size, size, size, PixelFormat.getByteBgraPreInstance(), buffer, 0, size * 4);
+            pw.setPixels(x, y, 1, 1, PixelFormat.getByteBgraPreInstance(), pixelColor, 0, 1);
         }
     }
 
@@ -57,34 +46,65 @@ public class Renderer {
     }
 
     public void drawPixels(int x, int y, int width, int height, Pixel[] pixels) {
-        int size = window.getPixelSize();
+        Layer layer = getActivelayer();
+        int layerWidth = layer.getWidth();
+        int layerHeight = layer.getHeight();
 
-        int bufferWidth = (size * width)*4;
-        int bufferHeight = (size * height);
-        byte[] buffer = new byte[bufferWidth * bufferHeight];
+        if ((x) < layerWidth && (y) < layerHeight) {
+            int xOffset = 0;
+            int yOffset = 0;
+            int widthOffset = 0;
+            int heightOffset = 0;
 
-        for(int iy=0;iy<bufferHeight;iy++){
-            for(int ix=0;ix<bufferWidth;ix+=4){
-                byte[] pixelColor = pixels[(ix/size)/4 + (iy/size) *width].getRGB();
-                buffer[ix + iy * bufferWidth] = pixelColor[0];
-                buffer[ix+1 + iy * bufferWidth] = pixelColor[1];
-                buffer[ix+2 + iy * bufferWidth] = pixelColor[2];
-                buffer[ix+3 + iy * bufferWidth] = pixelColor[3];
+            if (x < 0) {
+                xOffset = x * -1;
+                widthOffset = xOffset;
+                x = 0;
+            } else if ((x + width)  > layerWidth) {
+                widthOffset = ((x + width) - layerWidth);
+            }
+            if (y < 0) {
+                yOffset = y * -1;
+                heightOffset = yOffset;
+                y = 0;
+            } else if ((y + height) > layerHeight) {
+                heightOffset = ((y + height) - layerHeight);
+            }
+
+            int bufferWidth = ((width - widthOffset)) * 4;
+            int bufferHeight = ((height - heightOffset));
+            if (bufferWidth > 0 && bufferHeight > 0) {
+                byte[] buffer = new byte[bufferWidth * bufferHeight];
+
+                for (int iy = 0; iy < bufferHeight; iy++) {
+                    for (int ix = 0; ix < bufferWidth; ix += 4) {
+                        int pixelX = ((ix) / 4) + xOffset;
+                        int pixelY = (iy) + yOffset;
+                        byte[] pixelColor = pixels[pixelX + pixelY * width].getRGB();
+                        int i = ix + iy * bufferWidth;
+                        buffer[i] = pixelColor[0];
+                        buffer[i + 1] = pixelColor[1];
+                        buffer[i + 2] = pixelColor[2];
+                        buffer[i + 3] = pixelColor[3];
+                    }
+                }
+
+                width -= widthOffset;
+                height -= heightOffset;
+                drawPixels(x, y, width, height, buffer);
             }
         }
+    }
 
+    public void drawBuffer(int x, int y, int width, int height, byte[] buffer) {
         drawPixels(x, y, width, height, buffer);
     }
 
-    public void drawPixels(int x, int y, int width, int height, byte[] buffer) {
+    private void drawPixels(int x, int y, int width, int height, byte[] buffer) {
         Layer layer = getActivelayer();
-        int size = window.getPixelSize();
-
-        // TODO FUTURE: Make this method do the resize of the buffer
-        // TODO FUTURE: This is to make it possible to draw byte[] directly
 
         PixelWriter pw = layer.getImage().getPixelWriter();
-        pw.setPixels(x * size, y * size, width*size, height*size, PixelFormat.getByteBgraPreInstance(), buffer, 0, width*size*4);
+        pw.setPixels(x, y, width, height, PixelFormat.getByteBgraPreInstance(), buffer, 0, width * 4);
     }
 
     public void drawSquare(Point2D pos, int size, Pixel pixel) {
@@ -171,8 +191,12 @@ public class Renderer {
         }
     }
 
-    public void drawSprite() {
+    public void drawSprite(Point2D pos, Sprite sprite) {
+        drawSprite(pos.getX(), pos.getY(), sprite);
+    }
 
+    public void drawSprite(int x, int y, Sprite sprite) {
+        drawPixels(x, y, sprite.getWidth(), sprite.getHeight(), sprite.getPixels());
     }
 
     public void clear() {
@@ -184,6 +208,18 @@ public class Renderer {
     }
 
     // LAYER LOGIC
+
+    public void createLayer(String name) {
+        createLayer(name, window.getWidth(), window.getHeight(), window.getPixelSize());
+    }
+
+    public void createLayer(String name, int width, int height) {
+        createLayer(name, width, height, window.getPixelSize());
+    }
+
+    public void createLayer(String name, int width, int height, int pixelSize) {
+        addLayer(name, new Layer(width, height, pixelSize));
+    }
 
     public void addLayer(String name, Layer layer) {
         layers.put(name, layer);

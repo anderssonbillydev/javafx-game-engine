@@ -9,7 +9,7 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		GameEngine engine = new GameEngine(200, 150, 5) {
+		GameEngine engine = new GameEngine(TITLE, stage, 400, 300, 3) {
 			@Override
 			public void onCreate() {
 
@@ -21,16 +21,11 @@ public class Main extends Application {
 			}
 		};
 
-		stage.setResizable(false);
-		stage.setTitle(TITLE);
-		stage.setScene(engine.createScene());
-		stage.sizeToScene();
-		stage.show();
-
 		engine.debug("tracker");
 		engine.debug("static");
 //		engine.debug("checker");
 //		engine.debug("line");
+		engine.debug("sprite");
 	}
 
 	public static void main(String[] args) {

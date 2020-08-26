@@ -25,8 +25,7 @@ public class InputHandler {
 	}
 
 	public void removeKey(KeyCode key){
-		if(keys.contains(key))
-			keys.remove(key);
+		keys.remove(key);
 	}
 
 	public boolean isKeyPressed(KeyCode key){
@@ -39,8 +38,7 @@ public class InputHandler {
 	}
 
 	public void removeMouseButton(MouseButton button){
-		if(mouseButtons.contains(button))
-			mouseButtons.remove(button);
+		mouseButtons.remove(button);
 	}
 
 	public boolean isMouseButtonPressed(MouseButton button){
