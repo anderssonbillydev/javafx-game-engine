@@ -1,6 +1,9 @@
-package game_engine.render;
+package game_engine.renderer;
 
 import game_engine.model.Point2D;
+import game_engine.renderer.object.Pixel;
+import game_engine.renderer.object.sprite.Sprite;
+import game_engine.renderer.object.shape.Shape;
 import game_engine.window.Window;
 import javafx.scene.Group;
 import javafx.scene.image.PixelFormat;
@@ -36,8 +39,7 @@ public class Renderer {
         if (x >= 0 && x < width &&
                 y >= 0 && y < height) {
             byte[] pixelColor = pixel.getRGB();
-            PixelWriter pw = layer.getImage().getPixelWriter();
-            pw.setPixels(x, y, 1, 1, PixelFormat.getByteBgraPreInstance(), pixelColor, 0, 1);
+            drawPixels(x,y,1,1,pixelColor);
         }
     }
 
@@ -60,27 +62,34 @@ public class Renderer {
                 xOffset = x * -1;
                 widthOffset = xOffset;
                 x = 0;
-            } else if ((x + width)  > layerWidth) {
-                widthOffset = ((x + width) - layerWidth);
+            } else if ((x + width) > layerWidth) {
+                widthOffset = (x + width) - layerWidth;
             }
             if (y < 0) {
                 yOffset = y * -1;
                 heightOffset = yOffset;
                 y = 0;
             } else if ((y + height) > layerHeight) {
-                heightOffset = ((y + height) - layerHeight);
+                heightOffset = (y + height) - layerHeight;
             }
 
-            int bufferWidth = ((width - widthOffset)) * 4;
-            int bufferHeight = ((height - heightOffset));
+            int widthWithOffset = width - widthOffset;
+            int heightWithOffset = height - heightOffset;
+
+            // Correct ArrayOutOfBoundsException when circle is outside (left and right) and (up and down)
+            if (widthWithOffset > layerWidth)
+                widthWithOffset -= widthWithOffset - layerWidth;
+            if (heightWithOffset > layerHeight)
+                heightWithOffset -= heightWithOffset - layerHeight;
+
+            int bufferWidth = widthWithOffset * 4;
+            int bufferHeight = heightWithOffset;
             if (bufferWidth > 0 && bufferHeight > 0) {
                 byte[] buffer = new byte[bufferWidth * bufferHeight];
 
                 for (int iy = 0; iy < bufferHeight; iy++) {
                     for (int ix = 0; ix < bufferWidth; ix += 4) {
-                        int pixelX = ((ix) / 4) + xOffset;
-                        int pixelY = (iy) + yOffset;
-                        byte[] pixelColor = pixels[pixelX + pixelY * width].getRGB();
+                        byte[] pixelColor = pixels[((ix / 4) + xOffset) + (iy + yOffset) * width].getRGB();
                         int i = ix + iy * bufferWidth;
                         buffer[i] = pixelColor[0];
                         buffer[i + 1] = pixelColor[1];
@@ -88,10 +97,7 @@ public class Renderer {
                         buffer[i + 3] = pixelColor[3];
                     }
                 }
-
-                width -= widthOffset;
-                height -= heightOffset;
-                drawPixels(x, y, width, height, buffer);
+                drawPixels(x, y, widthWithOffset, heightWithOffset, buffer);
             }
         }
     }
@@ -104,27 +110,19 @@ public class Renderer {
         Layer layer = getActivelayer();
 
         PixelWriter pw = layer.getImage().getPixelWriter();
-        pw.setPixels(x, y, width, height, PixelFormat.getByteBgraPreInstance(), buffer, 0, width * 4);
-    }
-
-    public void drawSquare(Point2D pos, int size, Pixel pixel) {
-        drawSquare(pos.getX(), pos.getY(), size, pixel);
-    }
-
-    public void drawSquare(int x, int y, int size, Pixel pixel) {
-        drawRectangle(x, y, size, size, pixel);
-    }
-
-    public void drawRectangle(Point2D pos, int width, int height, Pixel pixel) {
-        drawRectangle(pos.getX(), pos.getY(), width, height, pixel);
-    }
-
-    public void drawRectangle(int x, int y, int width, int height, Pixel pixel) {
-        for (int iy = 0; iy < height; iy++) {
-            for (int ix = 0; ix < width; ix++) {
-                drawPixel(x + ix, y + iy, pixel);
-            }
+        try {
+            pw.setPixels(x, y, width, height, PixelFormat.getByteBgraPreInstance(), buffer, 0, width * 4);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            e.printStackTrace();
         }
+    }
+
+    public void drawShape(Point2D pos, Shape shape){
+        drawShape(pos.getX(), pos.getY(), shape);
+    }
+
+    public void drawShape(int x, int y, Shape shape){
+        drawPixels(x,y,shape.getWidth(),shape.getHeight(), shape.getPixels());
     }
 
     public void drawLine(Point2D pos1, Point2D pos2, Pixel pixel) {
@@ -200,7 +198,7 @@ public class Renderer {
     }
 
     public void clear() {
-        // TODO fix clear so whole layer is emptied
+        // TODO fix clear so whole layer is emptied, layer.getBackgroundColor() ?
         Layer layer = getLayer(activeLayer);
         layer.getBlank();
         PixelWriter pw = layer.getImage().getPixelWriter();

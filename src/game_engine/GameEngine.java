@@ -2,7 +2,13 @@ package game_engine;
 
 import com.sun.javafx.perf.PerformanceTracker;
 import game_engine.handler.InputHandler;
-import game_engine.render.*;
+import game_engine.renderer.*;
+import game_engine.renderer.object.Pixel;
+import game_engine.renderer.object.sprite.Sprite;
+import game_engine.renderer.object.shape.Circle;
+import game_engine.renderer.object.shape.Rectangle;
+import game_engine.renderer.object.shape.Shape;
+import game_engine.renderer.object.shape.Square;
 import game_engine.window.Window;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
@@ -23,6 +29,7 @@ public abstract class GameEngine {
     private Scene scene;
     private Renderer renderer;
     private InputHandler inputHandler;
+    private AnimationTimer gameLoop;
 
     public GameEngine(String title, Stage stage, int width, int height) {
         this(title, stage, width, height, 1);
@@ -35,17 +42,19 @@ public abstract class GameEngine {
         this.renderer = new Renderer(this.window);
         this.inputHandler = new InputHandler();
         setupStage();
+        this.gameLoop = createGameLoop();
     }
 
-    private void setupStage(){
+    private void setupStage() {
         stage.setResizable(false);
         stage.setTitle(this.title);
         stage.setScene(createScene());
         stage.sizeToScene();
         stage.show();
+        onCreate();
     }
 
-    public Scene createScene() {
+    private Scene createScene() {
         screne = new Pane();
         screne.getChildren().add(renderer.getScreen());
 
@@ -61,9 +70,30 @@ public abstract class GameEngine {
         return scene;
     }
 
+    private AnimationTimer createGameLoop() {
+        return new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                onUpdate(now);
+            }
+        };
+    }
+
     public abstract void onCreate();
 
-    public abstract void onUpdate();
+    public abstract void onUpdate(long now);
+
+    private void gameLoop() {
+
+    }
+
+    public void start() {
+        this.gameLoop.start();
+    }
+
+    public void stop() {
+        this.gameLoop.stop();
+    }
 
     public Renderer getRenderer() {
         return renderer;
@@ -110,16 +140,16 @@ public abstract class GameEngine {
                         Pixel p1 = new Pixel(Color.WHITE);
                         Pixel p2 = new Pixel(Color.BLACK);
                         Pixel[] pixels = new Pixel[width * height];
-                        for(int y=0;y<height;y++){
-                            for(int x=0;x<width;x++){
-                                if((y+x)%2 == 0)
-                                    pixels[x+y*width] = p1;
+                        for (int y = 0; y < height; y++) {
+                            for (int x = 0; x < width; x++) {
+                                if ((y + x) % 2 == 0)
+                                    pixels[x + y * width] = p1;
                                 else
-                                    pixels[x+y*width] = p2;
+                                    pixels[x + y * width] = p2;
                             }
                         }
-                        pixels[pixels.length-1] = new Pixel(Color.RED);
-                        pixels[width-1] = new Pixel(Color.RED);
+                        pixels[pixels.length - 1] = new Pixel(Color.RED);
+                        pixels[width - 1] = new Pixel(Color.RED);
                         renderer.drawPixels(0, 0, width, height, pixels);
                     }
                 };
@@ -175,9 +205,53 @@ public abstract class GameEngine {
                                     mouseX / window.getPixelSize(),
                                     mouseY / window.getPixelSize(),
                                     thick,
-                                    new Pixel(Color.BLUE));
+                                    new Pixel(Color.AQUA));
                             oldMouseX = mouseX;
                             oldMouseY = mouseY;
+                        }
+                    }
+                };
+                testLoop.start();
+                break;
+            case "circle":
+                renderer.createLayer("circle");
+                testLoop = new AnimationTimer() {
+                    int x = 0;
+                    int y = 0;
+                    int r = 5;
+
+                    Circle circle = new Circle(r,new Pixel(Color.AMETHYST));
+
+                    long old = System.nanoTime();
+
+                    @Override
+                    public void handle(long now) {
+                        renderer.clear();
+//                        renderer.drawCircle(x, y, r, new Pixel(Color.DARK_BLUE));
+                        renderer.drawShape(x,y,circle);
+                        if (now - old >= 50000000) {
+                            old = now;
+
+                            if (getInputHandler().isKeyPressed(KeyCode.LEFT)) {
+                                x--;
+                            }
+                            if (getInputHandler().isKeyPressed(KeyCode.RIGHT)) {
+                                x++;
+                            }
+                            if (getInputHandler().isKeyPressed(KeyCode.UP)) {
+                                y--;
+                            }
+                            if (getInputHandler().isKeyPressed(KeyCode.DOWN)) {
+                                y++;
+                            }
+                            if (getInputHandler().isKeyPressed(KeyCode.ADD)) {
+//                                r++;
+                                circle.setRadius(circle.getRadius()+1);
+                            }
+                            if (getInputHandler().isKeyPressed(KeyCode.SUBTRACT)) {
+                                if (circle.getRadius() > 0)
+                                    circle.setRadius(circle.getRadius() - 1);
+                            }
                         }
                     }
                 };
@@ -186,7 +260,7 @@ public abstract class GameEngine {
             case "sprite":
                 renderer.createLayer("sprite");
 
-                Sprite sprite = new Sprite("C:\\Users\\billy.andersson\\Pictures\\stop.png",256,256);
+                Sprite sprite = new Sprite("C:\\Users\\billy.andersson\\Pictures\\stop.png", 256, 256);
                 testLoop = new AnimationTimer() {
                     int x = 0;
                     int y = 0;
@@ -199,20 +273,20 @@ public abstract class GameEngine {
                     public void handle(long now) {
                         renderer.setActiveLayer("sprite");
 
-                        if(inputHandler.isKeyPressed(KeyCode.LEFT)){
+                        if (inputHandler.isKeyPressed(KeyCode.LEFT)) {
                             x--;
                         }
-                        if(inputHandler.isKeyPressed(KeyCode.RIGHT)){
+                        if (inputHandler.isKeyPressed(KeyCode.RIGHT)) {
                             x++;
                         }
-                        if(inputHandler.isKeyPressed(KeyCode.UP)){
+                        if (inputHandler.isKeyPressed(KeyCode.UP)) {
                             y--;
                         }
-                        if(inputHandler.isKeyPressed(KeyCode.DOWN)){
+                        if (inputHandler.isKeyPressed(KeyCode.DOWN)) {
                             y++;
                         }
 
-                        if(oldX != x ||oldY != y) {
+                        if (oldX != x || oldY != y) {
                             oldX = x;
                             oldY = y;
                             renderer.clear();
@@ -222,9 +296,46 @@ public abstract class GameEngine {
                 };
                 testLoop.start();
                 break;
-        }
-    }
+            case "shape":
+                renderer.createLayer("shape");
 
-    public void test() {
+                Shape square = new Square(10, new Pixel(Color.RED));
+                Shape rectangle = new Rectangle(5, 25, new Pixel(Color.RED));
+                testLoop = new AnimationTimer() {
+                    int x = 0;
+                    int y = 0;
+
+                    int oldX = -1;
+                    int oldY = -1;
+
+
+                    @Override
+                    public void handle(long now) {
+                        renderer.setActiveLayer("shape");
+
+                        if (inputHandler.isKeyPressed(KeyCode.LEFT)) {
+                            x--;
+                        }
+                        if (inputHandler.isKeyPressed(KeyCode.RIGHT)) {
+                            x++;
+                        }
+                        if (inputHandler.isKeyPressed(KeyCode.UP)) {
+                            y--;
+                        }
+                        if (inputHandler.isKeyPressed(KeyCode.DOWN)) {
+                            y++;
+                        }
+
+                        if (oldX != x || oldY != y) {
+                            oldX = x;
+                            oldY = y;
+                            renderer.clear();
+                            renderer.drawShape(x, y, square);
+                        }
+                    }
+                };
+                testLoop.start();
+                break;
+        }
     }
 }

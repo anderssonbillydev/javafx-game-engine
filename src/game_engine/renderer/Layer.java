@@ -1,4 +1,4 @@
-package game_engine.render;
+package game_engine.renderer;
 
 import game_engine.javafx.scene.image.PixelatedScalingImageView;
 import game_engine.model.Point2D;
