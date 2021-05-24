@@ -1,4 +1,6 @@
-package game_engine.render;
+package game_engine.renderer.object.sprite;
+
+import game_engine.renderer.object.Pixel;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -6,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 
 public class Sprite {
+
+    // TODO Draw partial to allow sprite sheets
 
     private String path;
     private int width, height;
