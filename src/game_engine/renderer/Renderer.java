@@ -1,9 +1,9 @@
 package game_engine.renderer;
 
 import game_engine.model.Point2D;
-import game_engine.renderer.object.Pixel;
-import game_engine.renderer.object.sprite.Sprite;
-import game_engine.renderer.object.shape.Shape;
+import game_engine.renderer.objects.Pixel;
+import game_engine.renderer.objects.sprite.Sprite;
+import game_engine.renderer.objects.shape.Shape;
 import game_engine.window.Window;
 import javafx.scene.Group;
 import javafx.scene.image.PixelFormat;
@@ -125,6 +125,8 @@ public class Renderer {
         drawPixels(x,y,shape.getWidth(),shape.getHeight(), shape.getPixels());
     }
 
+    // TODO Line width
+
     public void drawLine(Point2D pos1, Point2D pos2, Pixel pixel) {
         drawLine(pos1.getX(), pos1.getY(), pos2.getX(), pos2.getY(), false, pixel);
     }
@@ -195,6 +197,14 @@ public class Renderer {
 
     public void drawSprite(int x, int y, Sprite sprite) {
         drawPixels(x, y, sprite.getWidth(), sprite.getHeight(), sprite.getPixels());
+    }
+
+    public void drawPartialSprite(Point2D pos, Point2D sPos, int width, int height, Sprite sprite){
+        drawPartialSprite(pos.getX(), pos.getY(), sPos.getX(), sPos.getY(), width,height,sprite);
+    }
+
+    public void drawPartialSprite(int x, int y, int sX, int sY, int width, int height, Sprite sprite){
+        drawPixels(x, y, width, height, sprite.getPartialPixels(sX, sY, width, height));
     }
 
     public void clear() {

@@ -1,4 +1,4 @@
-package game_engine.renderer.object;
+package game_engine.renderer.objects;
 
 public class Pixel {
 

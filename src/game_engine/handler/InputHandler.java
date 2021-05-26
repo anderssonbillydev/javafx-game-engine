@@ -9,6 +9,7 @@ import java.util.List;
 
 public class InputHandler {
 
+	// TODO Implement mouse wheel, scroll up and down
 	private List<KeyCode> keys;
 	private Point2D mousePosition;
 	private List<MouseButton> mouseButtons;

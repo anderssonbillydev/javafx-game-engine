@@ -3,12 +3,11 @@ package game_engine;
 import com.sun.javafx.perf.PerformanceTracker;
 import game_engine.handler.InputHandler;
 import game_engine.renderer.*;
-import game_engine.renderer.object.Pixel;
-import game_engine.renderer.object.sprite.Sprite;
-import game_engine.renderer.object.shape.Circle;
-import game_engine.renderer.object.shape.Rectangle;
-import game_engine.renderer.object.shape.Shape;
-import game_engine.renderer.object.shape.Square;
+import game_engine.renderer.objects.Pixel;
+import game_engine.renderer.objects.sprite.Sprite;
+import game_engine.renderer.objects.shape.Circle;
+import game_engine.renderer.objects.shape.Shape;
+import game_engine.renderer.objects.shape.Square;
 import game_engine.window.Window;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
@@ -25,7 +24,7 @@ public abstract class GameEngine {
     private String title;
     private Stage stage;
     private Window window;
-    private Pane screne;
+    private Pane screen;
     private Scene scene;
     private Renderer renderer;
     private InputHandler inputHandler;
@@ -55,15 +54,15 @@ public abstract class GameEngine {
     }
 
     private Scene createScene() {
-        screne = new Pane();
-        screne.getChildren().add(renderer.getScreen());
+        screen = new Pane();
+        screen.getChildren().add(renderer.getScreen());
 
-        scene = new Scene(screne, window.getScreenWidth(), window.getScreenHeight());
+        scene = new Scene(screen, window.getScreenWidth(), window.getScreenHeight());
         scene.setOnKeyPressed(key -> inputHandler.addKey(key.getCode()));
         scene.setOnKeyReleased(key -> inputHandler.removeKey(key.getCode()));
         scene.setOnMouseMoved(mouse -> {
-            inputHandler.setMouseX((int) mouse.getX());
-            inputHandler.setMouseY((int) mouse.getY());
+            inputHandler.setMouseX((int) mouse.getX() / window.getPixelSize());
+            inputHandler.setMouseY((int) mouse.getY() / window.getPixelSize());
         });
         scene.setOnMousePressed(mouse -> inputHandler.addMouseButton(mouse.getButton()));
         scene.setOnMouseReleased(mouse -> inputHandler.removeMouseButton(mouse.getButton()));
@@ -103,8 +102,8 @@ public abstract class GameEngine {
         return window;
     }
 
-    public Pane getScrene() {
-        return screne;
+    public Pane getScreen() {
+        return screen;
     }
 
     public InputHandler getInputHandler() {
@@ -119,7 +118,7 @@ public abstract class GameEngine {
             case "tracker":
                 Label debugLabel = new Label();
                 debugLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 25px; -fx-text-fill:white;");
-                screne.getChildren().add(debugLabel);
+                screen.getChildren().add(debugLabel);
                 testLoop = new AnimationTimer() {
                     @Override
                     public void handle(long now) {
@@ -202,8 +201,8 @@ public abstract class GameEngine {
                             renderer.drawLine(
                                     x,
                                     y,
-                                    mouseX / window.getPixelSize(),
-                                    mouseY / window.getPixelSize(),
+                                    mouseX,
+                                    mouseY,
                                     thick,
                                     new Pixel(Color.AQUA));
                             oldMouseX = mouseX;
@@ -216,42 +215,44 @@ public abstract class GameEngine {
             case "circle":
                 renderer.createLayer("circle");
                 testLoop = new AnimationTimer() {
-                    int x = 0;
-                    int y = 0;
-                    int r = 5;
+                    int mouseX = 0;
+                    int mouseY = 0;
+                    int oldMouseX = -1;
+                    int oldMouseY = -1;
 
-                    Circle circle = new Circle(r,new Pixel(Color.AMETHYST));
-
-                    long old = System.nanoTime();
+                    Circle circle = new Circle(5, 2, new Pixel(Color.AMETHYST));
 
                     @Override
                     public void handle(long now) {
-                        renderer.clear();
-//                        renderer.drawCircle(x, y, r, new Pixel(Color.DARK_BLUE));
-                        renderer.drawShape(x,y,circle);
-                        if (now - old >= 50000000) {
-                            old = now;
+                        renderer.setActiveLayer("circle");
 
-                            if (getInputHandler().isKeyPressed(KeyCode.LEFT)) {
-                                x--;
-                            }
-                            if (getInputHandler().isKeyPressed(KeyCode.RIGHT)) {
-                                x++;
-                            }
-                            if (getInputHandler().isKeyPressed(KeyCode.UP)) {
-                                y--;
-                            }
-                            if (getInputHandler().isKeyPressed(KeyCode.DOWN)) {
-                                y++;
-                            }
-                            if (getInputHandler().isKeyPressed(KeyCode.ADD)) {
-//                                r++;
-                                circle.setRadius(circle.getRadius()+1);
-                            }
-                            if (getInputHandler().isKeyPressed(KeyCode.SUBTRACT)) {
-                                if (circle.getRadius() > 0)
-                                    circle.setRadius(circle.getRadius() - 1);
-                            }
+                        mouseX = inputHandler.getMouseX();
+                        mouseY = inputHandler.getMouseY();
+                        if(mouseX != oldMouseX || mouseY != oldMouseY){
+                            renderer.clear();
+                            renderer.drawShape(mouseX - circle.getRadius(),mouseY - circle.getRadius(),circle);
+                            oldMouseX = mouseX;
+                            oldMouseY = mouseY;
+                        }
+                        if(getInputHandler().isMouseButtonPressed(MouseButton.PRIMARY)){
+                            renderer.clear();
+                            circle.setRadius(circle.getRadius() +1);
+                            renderer.drawShape(mouseX - circle.getRadius(),mouseY - circle.getRadius(),circle);
+                        }
+                        if(getInputHandler().isMouseButtonPressed(MouseButton.SECONDARY)){
+                            renderer.clear();
+                            circle.setRadius(circle.getRadius() -1);
+                            renderer.drawShape(mouseX - circle.getRadius(),mouseY - circle.getRadius(),circle);
+                        }
+                        if(getInputHandler().isKeyPressed(KeyCode.SUBTRACT)){
+                            renderer.clear();
+                            circle.setLineWidth(circle.getLineWidth()-1);
+                            renderer.drawShape(mouseX - circle.getRadius(),mouseY - circle.getRadius(),circle);
+                        }
+                        if(getInputHandler().isKeyPressed(KeyCode.ADD)){
+                            renderer.clear();
+                            circle.setLineWidth(circle.getLineWidth()+1);
+                            renderer.drawShape(mouseX - circle.getRadius(),mouseY - circle.getRadius(),circle);
                         }
                     }
                 };
@@ -260,7 +261,9 @@ public abstract class GameEngine {
             case "sprite":
                 renderer.createLayer("sprite");
 
-                Sprite sprite = new Sprite("C:\\Users\\billy.andersson\\Pictures\\stop.png", 256, 256);
+//                Sprite sprite = new Sprite(getClass().getClassLoader().getResource("50x50-transparent.png").getPath(), 50, 50);
+//                Sprite sprite = new Sprite(getClass().getClassLoader().getResource("48x48-16x16-sprites-spritesheet.png").getPath(), 48, 48);
+                Sprite sprite = new Sprite("48x48-16x16-sprites-spritesheet.png", 48, 48);
                 testLoop = new AnimationTimer() {
                     int x = 0;
                     int y = 0;
@@ -290,7 +293,8 @@ public abstract class GameEngine {
                             oldX = x;
                             oldY = y;
                             renderer.clear();
-                            renderer.drawSprite(x, y, sprite);
+//                            renderer.drawSprite(x, y, sprite);
+                            renderer.drawPartialSprite(x, y, 16, 16,16,16,sprite);
                         }
                     }
                 };
@@ -299,8 +303,8 @@ public abstract class GameEngine {
             case "shape":
                 renderer.createLayer("shape");
 
-                Shape square = new Square(10, new Pixel(Color.RED));
-                Shape rectangle = new Rectangle(5, 25, new Pixel(Color.RED));
+                Shape shape = new Square(10, 2, new Pixel(Color.RED), new Pixel(Color.BLUE));
+//                Shape shape = new Rectangle(5, 25, new Pixel(Color.RED),new Pixel(Color.BLUE));
                 testLoop = new AnimationTimer() {
                     int x = 0;
                     int y = 0;
@@ -330,7 +334,7 @@ public abstract class GameEngine {
                             oldX = x;
                             oldY = y;
                             renderer.clear();
-                            renderer.drawShape(x, y, square);
+                            renderer.drawShape(x, y, shape);
                         }
                     }
                 };
