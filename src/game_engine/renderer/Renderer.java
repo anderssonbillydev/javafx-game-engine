@@ -1,9 +1,8 @@
 package game_engine.renderer;
 
 import game_engine.model.Point2D;
-import game_engine.renderer.objects.Pixel;
-import game_engine.renderer.objects.sprite.Sprite;
-import game_engine.renderer.objects.shape.Shape;
+import game_engine.renderer.color.Pixel;
+import game_engine.renderer.render_objects.RenderObject;
 import game_engine.window.Window;
 import javafx.scene.Group;
 import javafx.scene.image.PixelFormat;
@@ -117,12 +116,20 @@ public class Renderer {
         }
     }
 
-    public void drawShape(Point2D pos, Shape shape){
-        drawShape(pos.getX(), pos.getY(), shape);
+    public void drawRenderObject(Point2D pos, RenderObject renderObject){
+        drawRenderObject(pos.getX(), pos.getY(), renderObject);
     }
 
-    public void drawShape(int x, int y, Shape shape){
-        drawPixels(x,y,shape.getWidth(),shape.getHeight(), shape.getPixels());
+    public void drawRenderObject(int x, int y, RenderObject renderObject){
+        drawPixels(x,y,renderObject.getWidth(),renderObject.getHeight(), renderObject.getPixels());
+    }
+
+    public void drawPartialRenderObject(Point2D pos, Point2D sPos, int width, int height, RenderObject renderObject){
+        drawPartialRenderObject(pos.getX(), pos.getY(), sPos.getX(), sPos.getY(), width,height,renderObject);
+    }
+
+    public void drawPartialRenderObject(int x, int y, int sX, int sY, int width, int height, RenderObject renderObject){
+        drawPixels(x, y, width, height, renderObject.getPartialPixels(sX, sY, width, height));
     }
 
     // TODO Line width
@@ -191,21 +198,15 @@ public class Renderer {
         }
     }
 
-    public void drawSprite(Point2D pos, Sprite sprite) {
-        drawSprite(pos.getX(), pos.getY(), sprite);
-    }
+//    public void drawSprite(Point2D pos, Sprite sprite) {
+//        drawSprite(pos.getX(), pos.getY(), sprite);
+//    }
+//
+//    public void drawSprite(int x, int y, Sprite sprite) {
+//        drawPixels(x, y, sprite.getWidth(), sprite.getHeight(), sprite.getPixels());
+//    }
 
-    public void drawSprite(int x, int y, Sprite sprite) {
-        drawPixels(x, y, sprite.getWidth(), sprite.getHeight(), sprite.getPixels());
-    }
 
-    public void drawPartialSprite(Point2D pos, Point2D sPos, int width, int height, Sprite sprite){
-        drawPartialSprite(pos.getX(), pos.getY(), sPos.getX(), sPos.getY(), width,height,sprite);
-    }
-
-    public void drawPartialSprite(int x, int y, int sX, int sY, int width, int height, Sprite sprite){
-        drawPixels(x, y, width, height, sprite.getPartialPixels(sX, sY, width, height));
-    }
 
     public void clear() {
         // TODO fix clear so whole layer is emptied, layer.getBackgroundColor() ?
@@ -216,6 +217,8 @@ public class Renderer {
     }
 
     // LAYER LOGIC
+
+    // TODO refactor to separate Layers class
 
     public void createLayer(String name) {
         createLayer(name, window.getWidth(), window.getHeight(), window.getPixelSize());

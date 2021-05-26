@@ -1,7 +1,7 @@
-package game_engine.renderer.objects.shape;
+package game_engine.renderer.render_objects.shape;
 
-import game_engine.renderer.Color;
-import game_engine.renderer.objects.Pixel;
+import game_engine.renderer.color.Color;
+import game_engine.renderer.color.Pixel;
 
 import java.util.Arrays;
 
@@ -34,10 +34,10 @@ public class Circle extends Shape {
     }
 
     @Override
-    protected Pixel[] createShape() {
-        Pixel[] pixels = new Pixel[diameter * diameter];
+    protected void createObject() {
+        setPixels(new Pixel[diameter * diameter]);
         Pixel transparent = new Pixel(Color.TRANSPARENT);
-        Arrays.fill(pixels, transparent);
+        Arrays.fill(getPixels(), transparent);
 
         int innerRadius = (radius - getLineWidth() + 1 < 1) ? 0 : radius - getLineWidth() + 1;
 
@@ -49,17 +49,17 @@ public class Circle extends Shape {
 
         while (xo >= y) {
             // Bottom Right
-            drawXLine(radius + xi, radius + xo, radius + y, getLinePixel(), pixels);
-            drawYLine(radius + y, radius + xi, radius + xo, getLinePixel(), pixels);
+            drawXLine(radius + xi, radius + xo, radius + y, getLinePixel());
+            drawYLine(radius + y, radius + xi, radius + xo, getLinePixel());
             // Bottom Left
-            drawXLine(radius - xo, radius - xi, radius + y, getLinePixel(), pixels);
-            drawYLine(radius - y, radius + xi, radius + xo, getLinePixel(), pixels);
+            drawXLine(radius - xo, radius - xi, radius + y, getLinePixel());
+            drawYLine(radius - y, radius + xi, radius + xo, getLinePixel());
             // Top Left
-            drawXLine(radius - xo, radius - xi, radius - y, getLinePixel(), pixels);
-            drawYLine(radius - y, radius - xo, radius - xi, getLinePixel(), pixels);
+            drawXLine(radius - xo, radius - xi, radius - y, getLinePixel());
+            drawYLine(radius - y, radius - xo, radius - xi, getLinePixel());
             // Top Right
-            drawXLine(radius + xi, radius + xo, radius - y, getLinePixel(), pixels);
-            drawYLine(radius + y, radius - xo, radius - xi, getLinePixel(), pixels);
+            drawXLine(radius + xi, radius + xo, radius - y, getLinePixel());
+            drawYLine(radius + y, radius - xo, radius - xi, getLinePixel());
 
             y++;
 
@@ -86,18 +86,16 @@ public class Circle extends Shape {
             for (int fillY = -innerRadius; fillY <= innerRadius; fillY++)
                 for (int fillX = -innerRadius; fillX <= innerRadius; fillX++)
                     if (fillX * fillX + fillY * fillY <= innerRadius * innerRadius + innerRadius + 1)
-                        pixels[(radius + fillX) + (radius + fillY) * diameter] = new Pixel(Color.GREEN);
+                        setPixel(radius + fillX, radius + fillY, getFillPixel());
         }
-
-        return pixels;
     }
 
-    private void drawXLine(int x1, int x2, int y, Pixel linePixel, Pixel[] pixels) {
-        while (x1 <= x2) pixels[(x1++) + y * diameter] = linePixel;
+    private void drawXLine(int x1, int x2, int y, Pixel linePixel) {
+        while (x1 <= x2) setPixel(x1++, y, linePixel);
     }
 
-    private void drawYLine(int x, int y1, int y2, Pixel linePixel, Pixel[] pixels) {
-        while (y1 <= y2) pixels[x + (y1++) * diameter] = linePixel;
+    private void drawYLine(int x, int y1, int y2, Pixel linePixel) {
+        while (y1 <= y2) setPixel(x, y1++, linePixel);
     }
 
     public int getRadius() {
@@ -110,7 +108,7 @@ public class Circle extends Shape {
             setDiameter(radius);
             setWidth(diameter);
             setHeight(diameter);
-            updateShape();
+            updateObject();
         }
     }
 

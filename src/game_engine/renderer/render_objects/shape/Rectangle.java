@@ -1,6 +1,6 @@
-package game_engine.renderer.objects.shape;
+package game_engine.renderer.render_objects.shape;
 
-import game_engine.renderer.objects.Pixel;
+import game_engine.renderer.color.Pixel;
 
 public class Rectangle extends Shape {
 
@@ -21,8 +21,8 @@ public class Rectangle extends Shape {
     }
 
     @Override
-    protected Pixel[] createShape() {
-        Pixel[] pixels = new Pixel[getWidth() * getHeight()];
+    protected void createObject() {
+        setPixels(new Pixel[getWidth() * getHeight()]);
 
         for (int y = 0; y < getHeight(); y++) {
             for (int x = 0; x < getWidth(); x++) {
@@ -32,14 +32,12 @@ public class Rectangle extends Shape {
                         y < getLineWidth() ||
                         y >= getHeight() - getLineWidth()) {
                     // Line
-                    pixels[x + y * getWidth()] = getLinePixel();
+                    setPixel(x,y,getLinePixel());
                 } else {
                     // Fill
-                    pixels[x + y * getWidth()] = getFillPixel();
+                    setPixel(x,y,getFillPixel());
                 }
             }
         }
-
-        return pixels;
     }
 }

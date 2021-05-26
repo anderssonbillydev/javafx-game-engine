@@ -1,13 +1,13 @@
-package game_engine.renderer.objects.shape;
+package game_engine.renderer.render_objects.shape;
 
-import game_engine.renderer.Color;
-import game_engine.renderer.objects.Pixel;
+import game_engine.renderer.color.Color;
+import game_engine.renderer.color.Pixel;
+import game_engine.renderer.render_objects.RenderObject;
 
-public abstract class Shape {
+public abstract class Shape extends RenderObject {
 
-    private int width, height, lineWidth;
+    private int lineWidth;
     private Pixel linePixel, fillPixel;
-    private Pixel[] pixels;
 
     public Shape(int width, int height, Pixel linePixel) {
         this(width, height, linePixel, new Pixel(Color.TRANSPARENT));
@@ -22,33 +22,11 @@ public abstract class Shape {
     }
 
     public Shape(int width, int height, int lineWidth, Pixel linePixel, Pixel fillPixel) {
-        this.width = width;
-        this.height = height;
+        setWidth(width);
+        setHeight(height);
         this.lineWidth = lineWidth;
         this.linePixel = linePixel;
         this.fillPixel = fillPixel;
-    }
-
-    protected abstract Pixel[] createShape();
-
-    protected void updateShape() {
-        pixels = createShape();
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
     }
 
     public int getLineWidth() {
@@ -58,7 +36,7 @@ public abstract class Shape {
     public void setLineWidth(int lineWidth) {
         if(lineWidth > 0) {
             this.lineWidth = lineWidth;
-            updateShape();
+            updateObject();
         }
     }
 
@@ -68,7 +46,7 @@ public abstract class Shape {
 
     public void setLinePixel(Pixel linePixel) {
         this.linePixel = linePixel;
-        updateShape();
+        updateObject();
     }
 
     public Pixel getFillPixel() {
@@ -77,16 +55,11 @@ public abstract class Shape {
 
     public void setFillPixel(Pixel fillPixel) {
         this.fillPixel = fillPixel;
-        updateShape();
+        updateObject();
     }
 
     public boolean isFilled(){
         return (this.fillPixel.getAlpha() != 0);
     }
 
-    public Pixel[] getPixels() {
-        if (pixels == null)
-            updateShape();
-        return pixels;
-    }
 }
