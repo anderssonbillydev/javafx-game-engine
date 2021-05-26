@@ -1,7 +1,7 @@
 package game_engine;
 
 import com.sun.javafx.perf.PerformanceTracker;
-import game_engine.handler.InputHandler;
+import game_engine.handlers.InputHandler;
 import game_engine.renderer.*;
 import game_engine.renderer.color.Color;
 import game_engine.renderer.color.Pixel;
@@ -128,12 +128,12 @@ public abstract class GameEngine {
                 testLoop.start();
                 break;
             case "checker":
-                renderer.createLayer("checker");
+                renderer.getLayerContext().createLayer("checker");
                 testLoop = new AnimationTimer() {
 
                     @Override
                     public void handle(long now) {
-                        renderer.setActiveLayer("checker");
+                        renderer.getLayerContext().setActiveLayer("checker");
                         int width = window.getWidth();
                         int height = window.getHeight();
                         Pixel p1 = new Pixel(Color.WHITE);
@@ -156,11 +156,11 @@ public abstract class GameEngine {
                 break;
             case "static":
                 Random r = new Random();
-                renderer.createLayer("static");
+                renderer.getLayerContext().createLayer("static");
                 testLoop = new AnimationTimer() {
                     @Override
                     public void handle(long now) {
-                        renderer.setActiveLayer("static");
+                        renderer.getLayerContext().setActiveLayer("static");
                         int width = window.getWidth();
                         int height = window.getHeight();
                         Pixel[] pixels = new Pixel[width * height];
@@ -173,7 +173,7 @@ public abstract class GameEngine {
                 testLoop.start();
                 break;
             case "line":
-                renderer.createLayer("line");
+                renderer.getLayerContext().createLayer("line");
                 testLoop = new AnimationTimer() {
                     int x = window.getWidth() / 2;
                     int y = window.getHeight() / 2;
@@ -184,7 +184,7 @@ public abstract class GameEngine {
 
                     @Override
                     public void handle(long now) {
-                        renderer.setActiveLayer("line");
+                        renderer.getLayerContext().setActiveLayer("line");
 
                         mouseX = inputHandler.getMouseX();
                         mouseY = inputHandler.getMouseY();
@@ -213,7 +213,7 @@ public abstract class GameEngine {
                 testLoop.start();
                 break;
             case "circle":
-                renderer.createLayer("circle");
+                renderer.getLayerContext().createLayer("circle");
                 testLoop = new AnimationTimer() {
                     int mouseX = 0;
                     int mouseY = 0;
@@ -225,7 +225,7 @@ public abstract class GameEngine {
 
                     @Override
                     public void handle(long now) {
-                        renderer.setActiveLayer("circle");
+                        renderer.getLayerContext().setActiveLayer("circle");
 
                         mouseX = inputHandler.getMouseX();
                         mouseY = inputHandler.getMouseY();
@@ -260,7 +260,7 @@ public abstract class GameEngine {
                 testLoop.start();
                 break;
             case "sprite":
-                renderer.createLayer("sprite");
+                renderer.getLayerContext().createLayer("sprite");
 
 //                Sprite sprite = new Sprite(getClass().getClassLoader().getResource("50x50-transparent.png").getPath(), 50, 50);
                 Sprite sprite = new Sprite("48x48-16x16-sprites-spritesheet.png", 48, 48);
@@ -277,7 +277,7 @@ public abstract class GameEngine {
 
                     @Override
                     public void handle(long now) {
-                        renderer.setActiveLayer("sprite");
+                        renderer.getLayerContext().setActiveLayer("sprite");
 
                         if (inputHandler.isKeyPressed(KeyCode.LEFT)) {
                             x--;
@@ -304,7 +304,7 @@ public abstract class GameEngine {
                 testLoop.start();
                 break;
             case "shape":
-                renderer.createLayer("shape");
+                renderer.getLayerContext().createLayer("shape");
 
                 Square shape = new Square(10, 2, new Pixel(Color.RED), new Pixel(Color.BLUE));
 //                Shape shape = new Rectangle(5, 25, new Pixel(Color.RED),new Pixel(Color.BLUE));
@@ -318,7 +318,7 @@ public abstract class GameEngine {
 
                     @Override
                     public void handle(long now) {
-                        renderer.setActiveLayer("shape");
+                        renderer.getLayerContext().setActiveLayer("shape");
 
                         if (inputHandler.isKeyPressed(KeyCode.LEFT)) {
                             x--;
