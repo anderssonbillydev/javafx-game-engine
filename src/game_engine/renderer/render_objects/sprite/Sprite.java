@@ -10,8 +10,6 @@ import java.io.IOException;
 
 public class Sprite extends RenderObject {
 
-    // TODO Make sprite a part of shapes/render render_objects
-
     private String path;
 
     public Sprite(String path, int width, int height) {
