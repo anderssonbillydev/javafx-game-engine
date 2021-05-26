@@ -1,6 +1,6 @@
-package game_engine.renderer.objects.shape;
+package game_engine.renderer.render_objects.shape;
 
-import game_engine.renderer.objects.Pixel;
+import game_engine.renderer.color.Pixel;
 
 public class Square extends Rectangle {
 
