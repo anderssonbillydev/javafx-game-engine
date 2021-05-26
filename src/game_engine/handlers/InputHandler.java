@@ -1,4 +1,4 @@
-package game_engine.handler;
+package game_engine.handlers;
 
 import game_engine.model.Point2D;
 import javafx.scene.input.KeyCode;

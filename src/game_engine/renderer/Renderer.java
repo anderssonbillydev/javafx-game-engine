@@ -2,39 +2,30 @@ package game_engine.renderer;
 
 import game_engine.model.Point2D;
 import game_engine.renderer.color.Pixel;
+import game_engine.renderer.layers.LayerContext;
 import game_engine.renderer.render_objects.RenderObject;
 import game_engine.window.Window;
 import javafx.scene.Group;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelWriter;
 
-import java.util.*;
-
 public class Renderer {
 
-    private Window window;
-    private LinkedHashMap<String, Layer> layers;
-    private Group screen;
-    private String activeLayer;
+    private LayerContext layerContext;
 
     public Renderer(Window window) {
-        this.window = window;
-        layers = new LinkedHashMap<>();
-        Layer bottomLayer = new Layer(this.window.getWidth(), this.window.getHeight(), this.window.getPixelSize());
-        layers.put("root", bottomLayer);
-        screen = new Group(bottomLayer.getScreen());
-        activeLayer = "root";
+        this.layerContext = new LayerContext(window);
     }
 
+    //////
     // DRAW METHODS
     public void drawPixel(Point2D pos, Pixel pixel) {
         drawPixel(pos.getX(), pos.getY(), pixel);
     }
 
     public void drawPixel(int x, int y, Pixel pixel) {
-        Layer layer = getActivelayer();
-        double width = layer.getWidth();
-        double height = layer.getHeight();
+        int width = layerContext.getActiveLayerWidth();
+        int height = layerContext.getActiveLayerHeight();
         if (x >= 0 && x < width &&
                 y >= 0 && y < height) {
             byte[] pixelColor = pixel.getRGB();
@@ -47,9 +38,8 @@ public class Renderer {
     }
 
     public void drawPixels(int x, int y, int width, int height, Pixel[] pixels) {
-        Layer layer = getActivelayer();
-        int layerWidth = layer.getWidth();
-        int layerHeight = layer.getHeight();
+        int layerWidth = layerContext.getActiveLayerWidth();
+        int layerHeight = layerContext.getActiveLayerHeight();
 
         if ((x) < layerWidth && (y) < layerHeight) {
             int xOffset = 0;
@@ -106,9 +96,7 @@ public class Renderer {
     }
 
     private void drawPixels(int x, int y, int width, int height, byte[] buffer) {
-        Layer layer = getActivelayer();
-
-        PixelWriter pw = layer.getImage().getPixelWriter();
+        PixelWriter pw = layerContext.getActiveLayerPixelWriter();
         try {
             pw.setPixels(x, y, width, height, PixelFormat.getByteBgraPreInstance(), buffer, 0, width * 4);
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -198,80 +186,15 @@ public class Renderer {
         }
     }
 
-//    public void drawSprite(Point2D pos, Sprite sprite) {
-//        drawSprite(pos.getX(), pos.getY(), sprite);
-//    }
-//
-//    public void drawSprite(int x, int y, Sprite sprite) {
-//        drawPixels(x, y, sprite.getWidth(), sprite.getHeight(), sprite.getPixels());
-//    }
-
-
-
-    public void clear() {
-        // TODO fix clear so whole layer is emptied, layer.getBackgroundColor() ?
-        Layer layer = getLayer(activeLayer);
-        layer.getBlank();
-        PixelWriter pw = layer.getImage().getPixelWriter();
-        pw.setPixels(0, 0, layer.getWidth(), layer.getHeight(), PixelFormat.getByteBgraPreInstance(), layer.getBlank(), 0, layer.getWidth() * 4);
+    public Group getScreen(){
+        return layerContext.getScreen();
     }
 
-    // LAYER LOGIC
-
-    // TODO refactor to separate Layers class
-
-    public void createLayer(String name) {
-        createLayer(name, window.getWidth(), window.getHeight(), window.getPixelSize());
+    public LayerContext getLayerContext(){
+        return layerContext;
     }
 
-    public void createLayer(String name, int width, int height) {
-        createLayer(name, width, height, window.getPixelSize());
-    }
-
-    public void createLayer(String name, int width, int height, int pixelSize) {
-        addLayer(name, new Layer(width, height, pixelSize));
-    }
-
-    public void addLayer(String name, Layer layer) {
-        layers.put(name, layer);
-        screen.getChildren().add(layer.getScreen());
-    }
-
-    public void removeLayer(String layerName) {
-        if (!layerName.equals("root") && layers.containsKey(layerName)) {
-            screen.getChildren().remove(layers.get(layerName).getScreen());
-            layers.remove(layerName);
-        }
-    }
-
-    public void setActiveLayer(String layerName) {
-        activeLayer = (layers.containsKey(layerName)) ? layerName : "root";
-    }
-
-    public String getActivelayerName() {
-        return activeLayer;
-    }
-
-    public Layer getActivelayer() {
-        return getLayer(getActivelayerName());
-    }
-
-    public Layer getLayer(String layerName) {
-        return layers.get(layerName);
-    }
-
-    // GETTERS AND SETTERS
-    public Group getScreen() {
-        return screen;
-    }
-
-    public Layer getBottomLayer() {
-        return layers.entrySet().iterator().next().getValue();
-    }
-
-    public Layer getTopLayer() {
-        Layer lastLayer = getBottomLayer();
-        for (Map.Entry<String, Layer> stringLayerEntry : layers.entrySet()) lastLayer = stringLayerEntry.getValue();
-        return lastLayer;
+    public void clear(){
+        layerContext.clear();
     }
 }
