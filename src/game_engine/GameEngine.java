@@ -21,6 +21,8 @@ import java.util.Random;
 
 public abstract class GameEngine {
 
+    private final long DELTA_TIME = 16_500_000; // 16.5ms in ns 1/60 fps
+
     private String title;
     private Stage stage;
     private Window window;
@@ -28,7 +30,7 @@ public abstract class GameEngine {
     private Scene scene;
     private Renderer renderer;
     private InputHandler inputHandler;
-    private AnimationTimer gameLoop;
+    private AnimationTimer gameLoop, frameLoop;
 
     public GameEngine(String title, Stage stage, int width, int height) {
         this(title, stage, width, height, 1);
@@ -42,6 +44,7 @@ public abstract class GameEngine {
         this.inputHandler = new InputHandler();
         setupStage();
         this.gameLoop = createGameLoop();
+        this.frameLoop = createFrameLoop();
     }
 
     private void setupStage() {
@@ -66,32 +69,68 @@ public abstract class GameEngine {
         });
         scene.setOnMousePressed(mouse -> inputHandler.addMouseButton(mouse.getButton()));
         scene.setOnMouseReleased(mouse -> inputHandler.removeMouseButton(mouse.getButton()));
+
+        scene.setOnScroll(scroll -> {
+            if (scroll.getDeltaY() > 0)
+                inputHandler.setScrollUp(true);
+            else
+                inputHandler.setScrollDown(true);
+        });
+
         return scene;
     }
 
     private AnimationTimer createGameLoop() {
         return new AnimationTimer() {
+            private long lastUpdate = 0;
+            private boolean fullSpeed = Boolean.parseBoolean(System.getProperty("javafx.animation.fullspeed"));
+            private boolean update = false;
+
             @Override
             public void handle(long now) {
-                onUpdate(now);
+                if (fullSpeed) {
+                    if (now - lastUpdate >= DELTA_TIME) {
+                        lastUpdate = now;
+                        update = true;
+                    }
+                } else
+                    update = true;
+
+
+                if (update) {
+                    onGameTick(now);
+                    update = false;
+                }
             }
         };
     }
 
+    private AnimationTimer createFrameLoop() {
+        return new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                onFrameUpdate(now);
+            }
+        };
+    }
+
+    // Runs when game engine starts
     public abstract void onCreate();
 
-    public abstract void onUpdate(long now);
+    // Runs every gameTick, usually used for game logic
+    public abstract void onGameTick(long now);
 
-    private void gameLoop() {
-
-    }
+    // Runs every frame, usually used for rendering
+    public abstract void onFrameUpdate(long now);
 
     public void start() {
         this.gameLoop.start();
+        this.frameLoop.start();
     }
 
     public void stop() {
         this.gameLoop.stop();
+        this.frameLoop.stop();
     }
 
     public Renderer getRenderer() {
@@ -110,6 +149,7 @@ public abstract class GameEngine {
         return inputHandler;
     }
 
+    // TODO move to example classes
     public void debug(String type) {
         PerformanceTracker tracker = PerformanceTracker.getSceneTracker(scene);
         AnimationTimer testLoop;
@@ -220,7 +260,7 @@ public abstract class GameEngine {
                     int oldMouseX = -1;
                     int oldMouseY = -1;
 
-//                    Circle circle = new Circle(5, 2, new Pixel(Color.AMETHYST));
+                    //                    Circle circle = new Circle(5, 2, new Pixel(Color.AMETHYST));
                     Circle circle = new Circle(5, 2, new Pixel(Color.AMETHYST), new Pixel(Color.BLUE));
 
                     @Override
@@ -229,31 +269,31 @@ public abstract class GameEngine {
 
                         mouseX = inputHandler.getMouseX();
                         mouseY = inputHandler.getMouseY();
-                        if(mouseX != oldMouseX || mouseY != oldMouseY){
+                        if (mouseX != oldMouseX || mouseY != oldMouseY) {
                             renderer.clear();
-                            renderer.drawRenderObject(mouseX - circle.getRadius(),mouseY - circle.getRadius(),circle);
+                            renderer.drawRenderObject(mouseX - circle.getRadius(), mouseY - circle.getRadius(), circle);
                             oldMouseX = mouseX;
                             oldMouseY = mouseY;
                         }
-                        if(getInputHandler().isMouseButtonPressed(MouseButton.PRIMARY)){
+                        if (getInputHandler().isMouseButtonPressed(MouseButton.PRIMARY)) {
                             renderer.clear();
-                            circle.setRadius(circle.getRadius() +1);
-                            renderer.drawRenderObject(mouseX - circle.getRadius(),mouseY - circle.getRadius(),circle);
+                            circle.setRadius(circle.getRadius() + 1);
+                            renderer.drawRenderObject(mouseX - circle.getRadius(), mouseY - circle.getRadius(), circle);
                         }
-                        if(getInputHandler().isMouseButtonPressed(MouseButton.SECONDARY)){
+                        if (getInputHandler().isMouseButtonPressed(MouseButton.SECONDARY)) {
                             renderer.clear();
-                            circle.setRadius(circle.getRadius() -1);
-                            renderer.drawRenderObject(mouseX - circle.getRadius(),mouseY - circle.getRadius(),circle);
+                            circle.setRadius(circle.getRadius() - 1);
+                            renderer.drawRenderObject(mouseX - circle.getRadius(), mouseY - circle.getRadius(), circle);
                         }
-                        if(getInputHandler().isKeyPressed(KeyCode.SUBTRACT)){
+                        if (getInputHandler().isScrollingUp()) {
                             renderer.clear();
-                            circle.setLineWidth(circle.getLineWidth()-1);
-                            renderer.drawRenderObject(mouseX - circle.getRadius(),mouseY - circle.getRadius(),circle);
+                            circle.setLineWidth(circle.getLineWidth() - 1);
+                            renderer.drawRenderObject(mouseX - circle.getRadius(), mouseY - circle.getRadius(), circle);
                         }
-                        if(getInputHandler().isKeyPressed(KeyCode.ADD)){
+                        if (getInputHandler().isScrollingDown()) {
                             renderer.clear();
-                            circle.setLineWidth(circle.getLineWidth()+1);
-                            renderer.drawRenderObject(mouseX - circle.getRadius(),mouseY - circle.getRadius(),circle);
+                            circle.setLineWidth(circle.getLineWidth() + 1);
+                            renderer.drawRenderObject(mouseX - circle.getRadius(), mouseY - circle.getRadius(), circle);
                         }
                     }
                 };
@@ -297,7 +337,7 @@ public abstract class GameEngine {
                             oldY = y;
                             renderer.clear();
 //                            renderer.drawRenderObject(x, y, sprite);
-                            renderer.drawPartialRenderObject(x, y, 16, 16,16,16,sprite);
+                            renderer.drawPartialRenderObject(x, y, 16, 16, 16, 16, sprite);
                         }
                     }
                 };
