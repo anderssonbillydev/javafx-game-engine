@@ -200,4 +200,6 @@ public class Renderer {
                 getLayerContext().getActiveLayerHeight(),
                 layerContext.getActivelayer().getBackgroundPixels());
     }
+
+    //TODO clear layer method
 }

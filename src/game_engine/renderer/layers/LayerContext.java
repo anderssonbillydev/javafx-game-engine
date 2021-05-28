@@ -5,13 +5,14 @@ import game_engine.window.Window;
 import javafx.scene.Group;
 import javafx.scene.image.PixelWriter;
 
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class LayerContext {
 
     // TODO Test layer sizes, scrolling and resizing. getOffset is used when moving layers
-    // TODO Be able to reorient layers with Z-index
 
     private Window window;
     private Group screen;
@@ -41,6 +42,7 @@ public class LayerContext {
 
     public void addLayer(String name, Layer layer) {
         layers.put(name, layer);
+        layer.setZIndex(layers.size());
         screen.getChildren().add(layer.getScreen());
     }
 
@@ -69,6 +71,24 @@ public class LayerContext {
 
     public int getActiveLayerHeight(){
         return getActivelayer().getHeight();
+    }
+
+    public int getActiveLayerZIndex(){
+        return getActivelayer().getZIndex();
+    }
+
+    public void setActiveLayerZIndex(int zIndex){
+        getActivelayer().setZIndex(zIndex);
+        sortLayers();
+    }
+
+    public int getLayerZIndex(String layerName){
+        return getLayer(layerName).getZIndex();
+    }
+
+    public void setLayerZIndex(String layerName, int zIndex){
+        getLayer(layerName).setZIndex(zIndex);
+        sortLayers();
     }
 
     public Pixel[] getActiveLayerBackgroundPixels(){
@@ -105,4 +125,9 @@ public class LayerContext {
         return lastLayer;
     }
 
+    private void sortLayers(){
+        layers = layers.entrySet().stream()
+                .sorted(Comparator.comparingInt(entry -> entry.getValue().getZIndex()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue)->oldValue, LinkedHashMap::new));
+    }
 }

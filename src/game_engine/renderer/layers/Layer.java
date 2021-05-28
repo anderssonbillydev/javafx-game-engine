@@ -14,7 +14,7 @@ public class Layer {
 
     private ImageView screen;
     private WritableImage image;
-    private int width, height, pixelSize;
+    private int width, height, pixelSize, zIndex;
     private Point2D offset;
     private Pixel[] backgroundPixels;
 
@@ -51,7 +51,7 @@ public class Layer {
         this.screen = new PixelatedScalingImageView(image);
         setOffset(offset);
         setBlendMode(blendMode);
-        backgroundPixels = new Pixel[this.width * this.height];
+        setBackgroundPixels(new Pixel[this.width * this.height]);
         setBackgroundColor(backgroundColor);
 
         this.screen.setSmooth(false);
@@ -83,6 +83,14 @@ public class Layer {
     // TODO setHeight doesn't change height of image or screen
     public void setHeight(int height) {
         this.height = height;
+    }
+
+    int getZIndex(){
+        return this.zIndex;
+    }
+
+    void setZIndex(int zIndex){
+        this.zIndex = zIndex;
     }
 
     public Point2D getOffset() {
