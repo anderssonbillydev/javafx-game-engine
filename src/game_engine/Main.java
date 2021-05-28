@@ -56,7 +56,6 @@ public class Main extends Application {
 
 
         engine.debug("tracker");
-//        engine.debug("static");
 //        engine.debug("checker");
 //        engine.debug("line");
 //        engine.debug("circle");
