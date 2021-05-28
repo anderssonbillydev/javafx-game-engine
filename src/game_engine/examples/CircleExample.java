@@ -49,7 +49,7 @@ public class CircleExample extends Application {
 
             @Override
             public void onFrameUpdate(long now) {
-                getRenderer().clear();
+                getRenderer().clearActiveLayer();
                 getRenderer().drawRenderObject(
                         getInputHandler().getMouseX() - circle.getRadius(),
                         getInputHandler().getMouseY() - circle.getRadius(),

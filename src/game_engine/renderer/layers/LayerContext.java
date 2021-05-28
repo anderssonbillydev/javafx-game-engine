@@ -1,14 +1,17 @@
 package game_engine.renderer.layers;
 
+import game_engine.renderer.color.Pixel;
 import game_engine.window.Window;
 import javafx.scene.Group;
-import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelWriter;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class LayerContext {
+
+    // TODO Test layer sizes, scrolling and resizing. getOffset is used when moving layers
+    // TODO Be able to reorient layers with Z-index
 
     private Window window;
     private Group screen;
@@ -18,14 +21,14 @@ public class LayerContext {
     public LayerContext(Window window){
         this.window = window;
         layers = new LinkedHashMap<>();
-        Layer bottomLayer = new Layer(this.window.getWidth(), this.window.getHeight(), this.window.getPixelSize());
+        Layer bottomLayer = new Layer(this.window.getGameWidth(), this.window.getGameHeight(), this.window.getPixelSize());
         layers.put("root", bottomLayer);
         screen = new Group(bottomLayer.getScreen());
         activeLayer = "root";
     }
 
     public void createLayer(String name) {
-        createLayer(name, window.getWidth(), window.getHeight(), window.getPixelSize());
+        createLayer(name, window.getGameWidth(), window.getGameHeight(), window.getPixelSize());
     }
 
     public void createLayer(String name, int width, int height) {
@@ -49,7 +52,7 @@ public class LayerContext {
     }
 
     public void setActiveLayer(String layerName) {
-        activeLayer = (layers.containsKey(layerName)) ? layerName : "root";
+        this.activeLayer = (layers.containsKey(layerName)) ? layerName : "root";
     }
 
     public Layer getActivelayer() {
@@ -66,6 +69,18 @@ public class LayerContext {
 
     public int getActiveLayerHeight(){
         return getActivelayer().getHeight();
+    }
+
+    public Pixel[] getActiveLayerBackgroundPixels(){
+        return getActivelayer().getBackgroundPixels();
+    }
+
+    public void setActiveLayerBackgroundColor(Pixel backgroundColor){
+        getActivelayer().setBackgroundColor(backgroundColor);
+    }
+
+    public void setActiveLayerBackgroundPixels(Pixel[] backgroundPixels){
+        getActivelayer().setBackgroundPixels(backgroundPixels);
     }
 
     public PixelWriter getActiveLayerPixelWriter(){
@@ -90,11 +105,4 @@ public class LayerContext {
         return lastLayer;
     }
 
-    public void clear() {
-        // TODO fix clear so whole layer is emptied, layer.getBackgroundColor() ?
-        Layer layer = getLayer(activeLayer);
-        layer.getBlank();
-        PixelWriter pw = layer.getImage().getPixelWriter();
-        pw.setPixels(0, 0, layer.getWidth(), layer.getHeight(), PixelFormat.getByteBgraPreInstance(), layer.getBlank(), 0, layer.getWidth() * 4);
-    }
 }

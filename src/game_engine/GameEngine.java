@@ -3,14 +3,9 @@ package game_engine;
 import com.sun.javafx.perf.PerformanceTracker;
 import game_engine.handlers.InputHandler;
 import game_engine.renderer.*;
-import game_engine.renderer.color.Color;
-import game_engine.renderer.color.Pixel;
-import game_engine.renderer.render_objects.sprite.Sprite;
-import game_engine.renderer.render_objects.shape.Square;
 import game_engine.window.Window;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
@@ -159,98 +154,5 @@ public abstract class GameEngine {
         stage.setTitle(title +
                 " - FPS: " + String.format("%.2f", tracker.getAverageFPS()) +
                 ", Pulses: " + String.format("%.2f", tracker.getAveragePulses()));
-    }
-
-    // TODO move to example classes
-    public void debug(String type) {
-        PerformanceTracker tracker = PerformanceTracker.getSceneTracker(scene);
-        AnimationTimer testLoop;
-
-        switch (type) {
-            case "sprite":
-                renderer.getLayerContext().createLayer("sprite");
-
-//                Sprite sprite = new Sprite(getClass().getClassLoader().getResource("50x50-transparent.png").getPath(), 50, 50);
-                Sprite sprite = new Sprite("48x48-16x16-sprites-spritesheet.png", 48, 48);
-//                Sprite sprite1 = new Sprite(getClass().getClassLoader().getResource("50x50-transparent.png").getPath(), 50, 50);
-//                sprite.setPartialPixels(16,16,16,16,sprite1.getPartialPixels(0,0,16,16));
-
-                testLoop = new AnimationTimer() {
-                    int x = 0;
-                    int y = 0;
-
-                    int oldX = -1;
-                    int oldY = -1;
-
-
-                    @Override
-                    public void handle(long now) {
-                        renderer.getLayerContext().setActiveLayer("sprite");
-
-                        if (inputHandler.isKeyPressed(KeyCode.LEFT)) {
-                            x--;
-                        }
-                        if (inputHandler.isKeyPressed(KeyCode.RIGHT)) {
-                            x++;
-                        }
-                        if (inputHandler.isKeyPressed(KeyCode.UP)) {
-                            y--;
-                        }
-                        if (inputHandler.isKeyPressed(KeyCode.DOWN)) {
-                            y++;
-                        }
-
-                        if (oldX != x || oldY != y) {
-                            oldX = x;
-                            oldY = y;
-                            renderer.clear();
-//                            renderer.drawRenderObject(x, y, sprite);
-                            renderer.drawPartialRenderObject(x, y, 16, 16, 16, 16, sprite);
-                        }
-                    }
-                };
-                testLoop.start();
-                break;
-            case "shape":
-                renderer.getLayerContext().createLayer("shape");
-
-                Square shape = new Square(10, 2, new Pixel(Color.RED), new Pixel(Color.BLUE));
-//                Shape shape = new Rectangle(5, 25, new Pixel(Color.RED),new Pixel(Color.BLUE));
-                testLoop = new AnimationTimer() {
-                    int x = 0;
-                    int y = 0;
-
-                    int oldX = -1;
-                    int oldY = -1;
-
-
-                    @Override
-                    public void handle(long now) {
-                        renderer.getLayerContext().setActiveLayer("shape");
-
-                        if (inputHandler.isKeyPressed(KeyCode.LEFT)) {
-                            x--;
-                        }
-                        if (inputHandler.isKeyPressed(KeyCode.RIGHT)) {
-                            x++;
-                        }
-                        if (inputHandler.isKeyPressed(KeyCode.UP)) {
-                            y--;
-                        }
-                        if (inputHandler.isKeyPressed(KeyCode.DOWN)) {
-                            y++;
-                        }
-
-                        if (oldX != x || oldY != y) {
-                            oldX = x;
-                            oldY = y;
-                            renderer.clear();
-                            renderer.drawRenderObject(x, y, shape);
-                        }
-                    }
-                };
-                testLoop.start();
-                break;
-        }
     }
 }

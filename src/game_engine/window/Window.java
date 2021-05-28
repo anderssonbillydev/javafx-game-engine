@@ -14,11 +14,13 @@ public class Window {
 		this.pixelSize = pixelSize;
 	}
 
-	public int getWidth() {
+	// Game screen width
+	public int getGameWidth() {
 		return width;
 	}
 
-	public int getHeight() {
+	// Game screen height
+	public int getGameHeight() {
 		return height;
 	}
 
@@ -26,10 +28,12 @@ public class Window {
 		return pixelSize;
 	}
 
+	// Screen width
 	public int getScreenWidth() {
 		return width * getPixelSize();
 	}
 
+	// Screen height
 	public int getScreenHeight() {
 		return height * getPixelSize();
 	}

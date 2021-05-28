@@ -194,7 +194,10 @@ public class Renderer {
         return layerContext;
     }
 
-    public void clear(){
-        layerContext.clear();
+    public void clearActiveLayer(){
+        drawPixels(0,0,
+                getLayerContext().getActiveLayerWidth(),
+                getLayerContext().getActiveLayerHeight(),
+                layerContext.getActivelayer().getBackgroundPixels());
     }
 }

@@ -46,7 +46,7 @@ public class LineExample extends Application {
 
             @Override
             public void onFrameUpdate(long now) {
-                getRenderer().clear();
+                getRenderer().clearActiveLayer();
                 getRenderer().drawLine(x, y,
                         getInputHandler().getMouseX(), getInputHandler().getMouseY(),
                         thick,
