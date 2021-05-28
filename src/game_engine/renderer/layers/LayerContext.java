@@ -22,7 +22,7 @@ public class LayerContext {
         this.window = window;
         screen = new Group();
         layers = new LinkedHashMap<>();
-        createLayer("root", this.window.getGameHeight(), this.window.getPixelSize());
+        createLayer("root", this.window.getGameWidth(), this.window.getGameHeight());
         setActiveLayer("root");
     }
 

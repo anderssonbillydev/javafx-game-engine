@@ -33,9 +33,9 @@ public class SpriteExample extends Application {
                 // Create new layer so background can show trough transparency
                 getRenderer().getLayerContext().createLayer("sprites");
                 getRenderer().getLayerContext().setActiveLayer("sprites");
-                getRenderer().drawRenderObject(0,0,sprite);
-                getRenderer().drawRenderObject(50,0,spriteTransparent);
-                getRenderer().drawPartialRenderObject(100,0,16,32,16,16,spriteSheet);
+                getRenderer().drawObject(0,0,sprite);
+                getRenderer().drawObject(50,0,spriteTransparent);
+                getRenderer().drawPartialObject(100,0,16,32,16,16,spriteSheet);
             }
 
             @Override

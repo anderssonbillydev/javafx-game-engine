@@ -61,13 +61,13 @@ public class LayerExample extends Application {
                 layer3 = layerCtx.createLayer(layerName3);
 
                 layerCtx.setActiveLayer(layerName1);
-                getRenderer().drawRenderObject(square1Pos, square1);
+                getRenderer().drawObject(square1Pos, square1);
 
                 layerCtx.setActiveLayer(layerName2);
-                getRenderer().drawRenderObject(square2Pos, square2);
+                getRenderer().drawObject(square2Pos, square2);
 
                 layerCtx.setActiveLayer(layerName3);
-                getRenderer().drawRenderObject(square3Pos, square3);
+                getRenderer().drawObject(square3Pos, square3);
 
                 layerCtx.setActiveLayer(layerName1);
             }
@@ -140,13 +140,13 @@ public class LayerExample extends Application {
                     square3.setLinePixel(lineColor);
 
                     layerCtx.setActiveLayer(layerName1);
-                    getRenderer().drawRenderObject(square1Pos, square1);
+                    getRenderer().drawObject(square1Pos, square1);
 
                     layerCtx.setActiveLayer(layerName2);
-                    getRenderer().drawRenderObject(square2Pos, square2);
+                    getRenderer().drawObject(square2Pos, square2);
 
                     layerCtx.setActiveLayer(layerName3);
-                    getRenderer().drawRenderObject(square3Pos, square3);
+                    getRenderer().drawObject(square3Pos, square3);
                 }
                 if (activeLayer.equals(layerName2)) {
                     square1.setLinePixel(lineColor);
@@ -154,13 +154,13 @@ public class LayerExample extends Application {
                     square3.setLinePixel(lineColor);
 
                     layerCtx.setActiveLayer(layerName1);
-                    getRenderer().drawRenderObject(square1Pos, square1);
+                    getRenderer().drawObject(square1Pos, square1);
 
                     layerCtx.setActiveLayer(layerName2);
-                    getRenderer().drawRenderObject(square2Pos, square2);
+                    getRenderer().drawObject(square2Pos, square2);
 
                     layerCtx.setActiveLayer(layerName3);
-                    getRenderer().drawRenderObject(square3Pos, square3);
+                    getRenderer().drawObject(square3Pos, square3);
                 }
                 if (activeLayer.equals(layerName3)) {
                     square1.setLinePixel(lineColor);
@@ -168,13 +168,13 @@ public class LayerExample extends Application {
                     square3.setLinePixel(activeColor);
 
                     layerCtx.setActiveLayer(layerName1);
-                    getRenderer().drawRenderObject(square1Pos, square1);
+                    getRenderer().drawObject(square1Pos, square1);
 
                     layerCtx.setActiveLayer(layerName2);
-                    getRenderer().drawRenderObject(square2Pos, square2);
+                    getRenderer().drawObject(square2Pos, square2);
 
                     layerCtx.setActiveLayer(layerName3);
-                    getRenderer().drawRenderObject(square3Pos, square3);
+                    getRenderer().drawObject(square3Pos, square3);
                 }
 
                 layerCtx.setActiveLayer(activeLayer);

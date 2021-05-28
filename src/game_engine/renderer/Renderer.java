@@ -108,19 +108,19 @@ public class Renderer {
         }
     }
 
-    public void drawRenderObject(Point2D pos, RenderObject renderObject){
-        drawRenderObject(pos.getX(), pos.getY(), renderObject);
+    public void drawObject(Point2D pos, RenderObject renderObject){
+        drawObject(pos.getX(), pos.getY(), renderObject);
     }
 
-    public void drawRenderObject(int x, int y, RenderObject renderObject){
+    public void drawObject(int x, int y, RenderObject renderObject){
         drawPixels(x,y,renderObject.getWidth(),renderObject.getHeight(), renderObject.getPixels());
     }
 
-    public void drawPartialRenderObject(Point2D pos, Point2D sPos, int width, int height, RenderObject renderObject){
-        drawPartialRenderObject(pos.getX(), pos.getY(), sPos.getX(), sPos.getY(), width,height,renderObject);
+    public void drawPartialObject(Point2D pos, Point2D sPos, int width, int height, RenderObject renderObject){
+        drawPartialObject(pos.getX(), pos.getY(), sPos.getX(), sPos.getY(), width,height,renderObject);
     }
 
-    public void drawPartialRenderObject(int x, int y, int sX, int sY, int width, int height, RenderObject renderObject){
+    public void drawPartialObject(int x, int y, int sX, int sY, int width, int height, RenderObject renderObject){
         drawPixels(x, y, width, height, renderObject.getPartialPixels(sX, sY, width, height));
     }
 
