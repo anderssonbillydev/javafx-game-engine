@@ -16,6 +16,7 @@ public class Layer {
     private WritableImage image;
     private int width, height, pixelSize, zIndex;
     private Point2D offset;
+    private Pixel backgroundColor;
     private Pixel[] backgroundPixels;
 
     public Layer(int width, int height, int pixelSize) {
@@ -44,19 +45,22 @@ public class Layer {
 
 
     public Layer(int width, int height, int pixelSize, Point2D offset, Pixel backgroundColor, BlendMode blendMode) {
-        setWidth(width);
-        setHeight(height);
+        this.width = width;
+        this.height = height;
         this.pixelSize = pixelSize;
         this.image = new WritableImage(this.width, this.height);
         this.screen = new PixelatedScalingImageView(image);
         setOffset(offset);
         setBlendMode(blendMode);
-        setBackgroundPixels(new Pixel[this.width * this.height]);
-        setBackgroundColor(backgroundColor);
-
+        setupBackground(backgroundColor);
         this.screen.setSmooth(false);
         this.screen.setFitWidth(this.width * this.pixelSize);
         this.screen.setFitHeight(this.height * this.pixelSize);
+    }
+
+    private void setupBackground(Pixel backgroundColor) {
+        setBackgroundPixels(new Pixel[this.width * this.height]);
+        setBackgroundColor(backgroundColor);
     }
 
     ImageView getScreen() {
@@ -71,25 +75,35 @@ public class Layer {
         return width;
     }
 
-    // TODO setWidth doesn't change width of image or screen
     public void setWidth(int width) {
-        this.width = width;
+        if (width > 0) {
+            this.width = width;
+            setupBackground(this.backgroundColor);
+            this.image = new WritableImage(this.width, this.height);
+            this.screen.setImage(image);
+            this.screen.setFitWidth(this.width * this.pixelSize);
+        }
     }
 
     public int getHeight() {
         return height;
     }
 
-    // TODO setHeight doesn't change height of image or screen
     public void setHeight(int height) {
-        this.height = height;
+        if (height > 0) {
+            this.height = height;
+            setupBackground(this.backgroundColor);
+            this.image = new WritableImage(this.width, this.height);
+            this.screen.setImage(image);
+            this.screen.setFitHeight(this.height * this.pixelSize);
+        }
     }
 
-    int getZIndex(){
+    int getZIndex() {
         return this.zIndex;
     }
 
-    void setZIndex(int zIndex){
+    void setZIndex(int zIndex) {
         this.zIndex = zIndex;
     }
 
@@ -99,8 +113,33 @@ public class Layer {
 
     public void setOffset(Point2D offset) {
         this.offset = offset;
-        this.screen.setX(this.offset.getX());
-        this.screen.setY(this.offset.getY());
+        this.screen.setX(this.offset.getX() * pixelSize);
+        this.screen.setY(this.offset.getY() * pixelSize);
+    }
+
+    public void setOffset(int x, int y) {
+        this.offset.setX(x);
+        this.offset.setY(y);
+        this.screen.setX(this.offset.getX() * pixelSize);
+        this.screen.setY(this.offset.getY() * pixelSize);
+    }
+
+    public int getOffsetX() {
+        return this.offset.getX();
+    }
+
+    public void setOffsetX(int offsetX) {
+        this.offset.setX(offsetX);
+        this.screen.setX(this.offset.getX() * pixelSize);
+    }
+
+    public int getOffsetY() {
+        return this.offset.getY();
+    }
+
+    public void setOffsetY(int offsetY) {
+        this.offset.setY(offsetY);
+        this.screen.setY(this.offset.getY() * pixelSize);
     }
 
     public BlendMode getBlendMode() {
@@ -112,6 +151,7 @@ public class Layer {
     }
 
     public void setBackgroundColor(Pixel backgroundColor) {
+        this.backgroundColor = backgroundColor;
         Arrays.fill(this.backgroundPixels, backgroundColor);
     }
 

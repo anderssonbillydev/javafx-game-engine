@@ -91,6 +91,10 @@ public class Renderer {
         }
     }
 
+    public void drawBuffer(Point2D pos, int width, int height, byte[] buffer) {
+        drawPixels(pos.getX(), pos.getY(), width, height, buffer);
+    }
+
     public void drawBuffer(int x, int y, int width, int height, byte[] buffer) {
         drawPixels(x, y, width, height, buffer);
     }
@@ -198,8 +202,17 @@ public class Renderer {
         drawPixels(0,0,
                 getLayerContext().getActiveLayerWidth(),
                 getLayerContext().getActiveLayerHeight(),
-                layerContext.getActivelayer().getBackgroundPixels());
+                layerContext.getActiveLayer().getBackgroundPixels());
     }
 
-    //TODO clear layer method
+    public void clearLayer(String layerName){
+        String activeLayer = layerContext.getActiveLayerName();
+        layerContext.setActiveLayer(layerName);
+        clearActiveLayer();
+        layerContext.setActiveLayer(activeLayer);
+    }
+
+    public void clearLayers(){
+        layerContext.getLayers().keySet().forEach(this::clearLayer);
+    }
 }
