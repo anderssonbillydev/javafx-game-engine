@@ -6,12 +6,14 @@ import game_engine.renderer.render_objects.shape.Circle;
 
 import java.util.Arrays;
 
-public class Line extends RenderObject{
+public class Line extends RenderObject {
 
     private int x1, y1, x2, y2, lineWidth;
+    private Circle circle;
     private Pixel linePixel;
 
-    public Line(int x1, int y1, int x2, int y2, int lineWidth, Pixel linePixel){
+    // TODO only draw circle when linewidth > 1
+    public Line(int x1, int y1, int x2, int y2, int lineWidth, Pixel linePixel) {
         this.x1 = x1;
         this.y1 = y1;
         this.x2 = x2;
@@ -21,14 +23,14 @@ public class Line extends RenderObject{
 
         setWidth(((x1 > x2) ? (x1 - x2 > 0) ? x1 - x2 : 1 : (x2 - x1 > 0) ? x2 - x1 : 1) + lineWidth);
         setHeight(((y1 > y2) ? (y1 - y2 > 0) ? y1 - y2 : 1 : (y2 - y1 > 0) ? y2 - y1 : 1) + lineWidth);
+        if (lineWidth > 1)
+            circle = new Circle(lineWidth / 2, linePixel, linePixel);
     }
 
     @Override
     protected void createObject() {
         setPixels(new Pixel[(getWidth() + lineWidth + 1) * (getHeight() + lineWidth + 1)]);
         Arrays.fill(getPixels(), new Pixel(Color.RED));
-        lineWidth = lineWidth / 2;
-        Circle circle = new Circle(lineWidth, linePixel, linePixel);
 
         if (x1 > x2) {
             x1 = getWidth() - lineWidth - 1;
@@ -62,7 +64,10 @@ public class Line extends RenderObject{
 
         if (dx >= dy) {
             while (true) {
-                drawThickLineCircle(x, y, circle);
+                if (lineWidth > 1)
+                    drawThickLineCircle(x, y, circle);
+                else
+                    setPixel(x,y,linePixel);
                 if (x == x2)
                     break;
                 x += ix;
@@ -74,7 +79,10 @@ public class Line extends RenderObject{
             }
         } else {
             while (true) {
-                drawThickLineCircle(x, y, circle);
+                if (lineWidth > 1)
+                    drawThickLineCircle(x, y, circle);
+                else
+                    setPixel(x,y,linePixel);
                 if (y == y2)
                     break;
                 y += iy;
@@ -92,7 +100,7 @@ public class Line extends RenderObject{
             for (int cx = 0; cx < circle.getWidth(); cx++) {
                 Pixel p = circle.getPixel(cx, cy);
                 if (p.getAlpha() > 0)
-                    setPixel((x + cx), (y + cy),circle.getPixel(cx, cy));
+                    setPixel((x + cx), (y + cy), circle.getPixel(cx, cy));
             }
         }
     }

@@ -18,8 +18,6 @@ public class Renderer {
         this.layerContext = new LayerContext(window);
     }
 
-    //////
-    // DRAW METHODS
     public void drawPixel(Point2D pos, Pixel pixel) {
         drawPixel(pos.getX(), pos.getY(), pixel);
     }
