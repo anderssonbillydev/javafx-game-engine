@@ -1,6 +1,8 @@
 package game_engine.examples;
 
 import game_engine.GameEngine;
+import game_engine.handlers.InputHandler;
+import game_engine.renderer.Renderer;
 import game_engine.renderer.color.Pixel;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -22,7 +24,7 @@ public class StaticExample extends Application {
             Pixel[] pixels;
 
             @Override
-            public void onCreate() {
+            public void onCreate(InputHandler inputHandler, Renderer renderer) {
                 System.out.println("Creates Static Example");
 
                 r = new Random();
@@ -30,15 +32,15 @@ public class StaticExample extends Application {
             }
 
             @Override
-            public void onGameTick(long now) {
+            public void onGameTick(InputHandler inputHandler, Renderer renderer, long now) {
                 for (int y = 0; y < height; y++)
                     for (int x = 0; x < width; x++)
                         pixels[x + y * width] = new Pixel(r.nextInt(256), r.nextInt(256), r.nextInt(256));
             }
 
             @Override
-            public void onFrameUpdate(long now) {
-                getRenderer().drawPixels(0, 0, width, height, pixels);
+            public void onFrameUpdate(InputHandler inputHandler, Renderer renderer, long now) {
+                renderer.drawPixels(0, 0, width, height, pixels);
             }
         };
         gameEngine.start();

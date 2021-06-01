@@ -48,7 +48,7 @@ public abstract class GameEngine {
         stage.setScene(createScene());
         stage.sizeToScene();
         stage.show();
-        onCreate();
+        onCreate(inputHandler,renderer);
     }
 
     private Scene createScene() {
@@ -93,7 +93,7 @@ public abstract class GameEngine {
 
 
                 if (update) {
-                    onGameTick(now);
+                    onGameTick(inputHandler, renderer, now);
                     update = false;
                 }
             }
@@ -104,7 +104,7 @@ public abstract class GameEngine {
         return new AnimationTimer() {
             @Override
             public void handle(long now) {
-                onFrameUpdate(now);
+                onFrameUpdate(inputHandler, renderer, now);
                 if (debug)
                     debug();
             }
@@ -112,13 +112,13 @@ public abstract class GameEngine {
     }
 
     // Runs when game engine starts
-    public abstract void onCreate();
+    public abstract void onCreate(InputHandler inputHandler, Renderer renderer);
 
     // Runs every gameTick, usually used for game logic
-    public abstract void onGameTick(long now);
+    public abstract void onGameTick(InputHandler inputHandler, Renderer renderer, long now);
 
     // Runs every frame, usually used for rendering
-    public abstract void onFrameUpdate(long now);
+    public abstract void onFrameUpdate(InputHandler inputHandler, Renderer renderer, long now);
 
     public void start() {
         this.gameLoop.start();
@@ -130,20 +130,12 @@ public abstract class GameEngine {
         this.frameLoop.stop();
     }
 
-    public Renderer getRenderer() {
-        return renderer;
-    }
-
     public Window getWindow() {
         return window;
     }
 
     public Pane getScreen() {
         return screen;
-    }
-
-    public InputHandler getInputHandler() {
-        return inputHandler;
     }
 
     public void setDebug(boolean debug) {

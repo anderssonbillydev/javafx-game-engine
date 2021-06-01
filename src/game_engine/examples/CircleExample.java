@@ -1,6 +1,8 @@
 package game_engine.examples;
 
 import game_engine.GameEngine;
+import game_engine.handlers.InputHandler;
+import game_engine.renderer.Renderer;
 import game_engine.renderer.color.Color;
 import game_engine.renderer.color.Pixel;
 import game_engine.renderer.render_objects.shape.Circle;
@@ -25,7 +27,7 @@ public class CircleExample extends Application {
             Pixel linePixel, fillPixel;
 
             @Override
-            public void onCreate() {
+            public void onCreate(InputHandler inputHandler, Renderer renderer) {
                 System.out.println("Creates Circle Example");
 
                 radius = 10;
@@ -36,23 +38,23 @@ public class CircleExample extends Application {
             }
 
             @Override
-            public void onGameTick(long now) {
-                if (getInputHandler().isMouseButtonPressed(MouseButton.PRIMARY))
+            public void onGameTick(InputHandler inputHandler, Renderer renderer, long now) {
+                if (inputHandler.isMouseButtonPressed(MouseButton.PRIMARY))
                     circle.setRadius(circle.getRadius() + 1);
-                if (getInputHandler().isMouseButtonPressed(MouseButton.SECONDARY))
+                if (inputHandler.isMouseButtonPressed(MouseButton.SECONDARY))
                     circle.setRadius(circle.getRadius() - 1);
-                if (getInputHandler().isScrollingUp())
+                if (inputHandler.isScrollingUp())
                     circle.setLineWidth(circle.getLineWidth() + 1);
-                if (getInputHandler().isScrollingDown())
+                if (inputHandler.isScrollingDown())
                     circle.setLineWidth(circle.getLineWidth() - 1);
             }
 
             @Override
-            public void onFrameUpdate(long now) {
-                getRenderer().clearActiveLayer();
-                getRenderer().drawObject(
-                        getInputHandler().getMouseX() - circle.getRadius(),
-                        getInputHandler().getMouseY() - circle.getRadius(),
+            public void onFrameUpdate(InputHandler inputHandler, Renderer renderer, long now) {
+                renderer.clearActiveLayer();
+                renderer.drawObject(
+                        inputHandler.getMouseX() - circle.getRadius(),
+                        inputHandler.getMouseY() - circle.getRadius(),
                         circle);
             }
         };

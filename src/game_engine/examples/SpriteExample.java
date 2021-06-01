@@ -1,6 +1,8 @@
 package game_engine.examples;
 
 import game_engine.GameEngine;
+import game_engine.handlers.InputHandler;
+import game_engine.renderer.Renderer;
 import game_engine.renderer.color.Color;
 import game_engine.renderer.color.Pixel;
 import game_engine.renderer.render_objects.sprite.Sprite;
@@ -21,30 +23,30 @@ public class SpriteExample extends Application {
             Sprite sprite, spriteTransparent, spriteSheet;
 
             @Override
-            public void onCreate() {
+            public void onCreate(InputHandler inputHandler, Renderer renderer) {
                 System.out.println("Creates Circle Example");
 
                 sprite = new Sprite("50x50.png",50,50);;
                 spriteTransparent = new Sprite("50x50-transparent.png",50,50);
                 spriteSheet = new Sprite("48x48-16x16-sprites-spritesheet.png",48,48);
 
-                getRenderer().getLayerContext().setActiveLayerBackgroundColor(new Pixel(Color.YELLOW));
-                getRenderer().clearActiveLayer();
+                renderer.getLayerContext().setActiveLayerBackgroundColor(new Pixel(Color.YELLOW));
+                renderer.clearActiveLayer();
                 // Create new layer so background can show trough transparency
-                getRenderer().getLayerContext().createLayer("sprites");
-                getRenderer().getLayerContext().setActiveLayer("sprites");
-                getRenderer().drawObject(0,0,sprite);
-                getRenderer().drawObject(50,0,spriteTransparent);
-                getRenderer().drawPartialObject(100,0,16,32,16,16,spriteSheet);
+                renderer.getLayerContext().createLayer("sprites");
+                renderer.getLayerContext().setActiveLayer("sprites");
+                renderer.drawObject(0,0,sprite);
+                renderer.drawObject(50,0,spriteTransparent);
+                renderer.drawPartialObject(100,0,16,32,16,16,spriteSheet);
             }
 
             @Override
-            public void onGameTick(long now) {
+            public void onGameTick(InputHandler inputHandler, Renderer renderer, long now) {
 
             }
 
             @Override
-            public void onFrameUpdate(long now) {
+            public void onFrameUpdate(InputHandler inputHandler, Renderer renderer, long now) {
 
             }
         };

@@ -1,7 +1,9 @@
 package game_engine.examples;
 
 import game_engine.GameEngine;
+import game_engine.handlers.InputHandler;
 import game_engine.model.Point2D;
+import game_engine.renderer.Renderer;
 import game_engine.renderer.color.Color;
 import game_engine.renderer.color.Pixel;
 import game_engine.renderer.layers.Layer;
@@ -31,14 +33,14 @@ public class LayerExample extends Application {
             Pixel lineColor, activeColor, fillColor;
 
             @Override
-            public void onCreate() {
+            public void onCreate(InputHandler inputHandler, Renderer renderer) {
                 System.out.println("Creates Layer Example");
                 System.out.println("Scroll up or down to change active layer");
                 System.out.println("Left or right click to change Z-index");
                 System.out.println("NumPad+ or NumPad- to change layer1 width");
                 System.out.println("Arrow keys moves layer1");
 
-                layerCtx = getRenderer().getLayerContext();
+                layerCtx = renderer.getLayerContext();
 
                 layerName1 = "layerName1";
                 layerName2 = "layerName2";
@@ -61,19 +63,19 @@ public class LayerExample extends Application {
                 layer3 = layerCtx.createLayer(layerName3);
 
                 layerCtx.setActiveLayer(layerName1);
-                getRenderer().drawObject(square1Pos, square1);
+                renderer.drawObject(square1Pos, square1);
 
                 layerCtx.setActiveLayer(layerName2);
-                getRenderer().drawObject(square2Pos, square2);
+                renderer.drawObject(square2Pos, square2);
 
                 layerCtx.setActiveLayer(layerName3);
-                getRenderer().drawObject(square3Pos, square3);
+                renderer.drawObject(square3Pos, square3);
 
                 layerCtx.setActiveLayer(layerName1);
             }
 
             @Override
-            public void onGameTick(long now) {
+            public void onGameTick(InputHandler inputHandler, Renderer renderer, long now) {
                 String activeLayer = layerCtx.getActiveLayerName();
 
                 if (activeLayer.equals(layerName1)) {
@@ -92,7 +94,7 @@ public class LayerExample extends Application {
                     square3.setLinePixel(activeColor);
                 }
 
-                if (getInputHandler().isScrollingUp()) {
+                if (inputHandler.isScrollingUp()) {
                     if (activeLayer.equals(layerName1))
                         layerCtx.setActiveLayer(layerName2);
                     if (activeLayer.equals(layerName2))
@@ -100,7 +102,7 @@ public class LayerExample extends Application {
                     if (activeLayer.equals(layerName3))
                         layerCtx.setActiveLayer(layerName1);
                 }
-                if (getInputHandler().isScrollingDown()) {
+                if (inputHandler.isScrollingDown()) {
                     if (activeLayer.equals(layerName1))
                         layerCtx.setActiveLayer(layerName3);
                     if (activeLayer.equals(layerName2))
@@ -108,31 +110,31 @@ public class LayerExample extends Application {
                     if (activeLayer.equals(layerName3))
                         layerCtx.setActiveLayer(layerName2);
                 }
-                if (getInputHandler().isMouseButtonPressed(MouseButton.PRIMARY))
+                if (inputHandler.isMouseButtonPressed(MouseButton.PRIMARY))
                     layerCtx.setActiveLayerZIndex(layerCtx.getActiveLayerZIndex() + 1);
-                if (getInputHandler().isMouseButtonPressed(MouseButton.SECONDARY))
+                if (inputHandler.isMouseButtonPressed(MouseButton.SECONDARY))
                     layerCtx.setActiveLayerZIndex(layerCtx.getActiveLayerZIndex() - 1);
-                if (getInputHandler().isKeyPressed(KeyCode.ADD))
+                if (inputHandler.isKeyPressed(KeyCode.ADD))
                     layer1.setWidth(layer1.getWidth() + 1);
-                if (getInputHandler().isKeyPressed(KeyCode.SUBTRACT))
+                if (inputHandler.isKeyPressed(KeyCode.SUBTRACT))
                     layer1.setWidth(layer1.getWidth() - 1);
 
-                if (getInputHandler().isKeyPressed(KeyCode.LEFT))
+                if (inputHandler.isKeyPressed(KeyCode.LEFT))
                     layer1.setOffsetX(layer1.getOffsetX() - 1);
-                if (getInputHandler().isKeyPressed(KeyCode.RIGHT))
+                if (inputHandler.isKeyPressed(KeyCode.RIGHT))
                     layer1.setOffsetX(layer1.getOffsetX() + 1);
-                if (getInputHandler().isKeyPressed(KeyCode.UP))
+                if (inputHandler.isKeyPressed(KeyCode.UP))
                     layer1.setOffsetY(layer1.getOffsetY() - 1);
-                if (getInputHandler().isKeyPressed(KeyCode.DOWN))
+                if (inputHandler.isKeyPressed(KeyCode.DOWN))
                     layer1.setOffsetY(layer1.getOffsetY() + 1);
 
             }
 
             @Override
-            public void onFrameUpdate(long now) {
+            public void onFrameUpdate(InputHandler inputHandler, Renderer renderer, long now) {
                 String activeLayer = layerCtx.getActiveLayerName();
 
-                getRenderer().clearLayers();
+                renderer.clearLayers();
 
                 if (activeLayer.equals(layerName1)) {
                     square1.setLinePixel(activeColor);
@@ -140,13 +142,13 @@ public class LayerExample extends Application {
                     square3.setLinePixel(lineColor);
 
                     layerCtx.setActiveLayer(layerName1);
-                    getRenderer().drawObject(square1Pos, square1);
+                    renderer.drawObject(square1Pos, square1);
 
                     layerCtx.setActiveLayer(layerName2);
-                    getRenderer().drawObject(square2Pos, square2);
+                    renderer.drawObject(square2Pos, square2);
 
                     layerCtx.setActiveLayer(layerName3);
-                    getRenderer().drawObject(square3Pos, square3);
+                    renderer.drawObject(square3Pos, square3);
                 }
                 if (activeLayer.equals(layerName2)) {
                     square1.setLinePixel(lineColor);
@@ -154,13 +156,13 @@ public class LayerExample extends Application {
                     square3.setLinePixel(lineColor);
 
                     layerCtx.setActiveLayer(layerName1);
-                    getRenderer().drawObject(square1Pos, square1);
+                    renderer.drawObject(square1Pos, square1);
 
                     layerCtx.setActiveLayer(layerName2);
-                    getRenderer().drawObject(square2Pos, square2);
+                    renderer.drawObject(square2Pos, square2);
 
                     layerCtx.setActiveLayer(layerName3);
-                    getRenderer().drawObject(square3Pos, square3);
+                    renderer.drawObject(square3Pos, square3);
                 }
                 if (activeLayer.equals(layerName3)) {
                     square1.setLinePixel(lineColor);
@@ -168,13 +170,13 @@ public class LayerExample extends Application {
                     square3.setLinePixel(activeColor);
 
                     layerCtx.setActiveLayer(layerName1);
-                    getRenderer().drawObject(square1Pos, square1);
+                    renderer.drawObject(square1Pos, square1);
 
                     layerCtx.setActiveLayer(layerName2);
-                    getRenderer().drawObject(square2Pos, square2);
+                    renderer.drawObject(square2Pos, square2);
 
                     layerCtx.setActiveLayer(layerName3);
-                    getRenderer().drawObject(square3Pos, square3);
+                    renderer.drawObject(square3Pos, square3);
                 }
 
                 layerCtx.setActiveLayer(activeLayer);
